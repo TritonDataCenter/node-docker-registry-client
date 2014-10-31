@@ -13,7 +13,6 @@
 var clients = require('../lib/clients');
 
 
-// XXX: use node-cmdln for subcommands
 var idx = clients.index.create({});
 var repo = 'library/mongo';
 
