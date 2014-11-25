@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "author": "Joyent (joyent.com)",
   "private": true,
+  "main": "./lib/clients/index.js",
   "dependencies": {
     "assert-plus": "0.1.5",
     "bunyan": "1.2.0",
