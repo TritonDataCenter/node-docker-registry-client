@@ -10,16 +10,14 @@
  * Copyright (c) 2014, Joyent, Inc.
  */
 
-var clients = require('../lib/clients');
+var docker = require('../');
 
-
-var idx = clients.index.create({});
 var repo = 'library/mongo';
-
-idx.getRepository(repo, function (err, res) {
+var idx = docker.createIndexClient();
+idx.listRepoImgs({repo: repo}, function (err, repoImgs, res) {
     if (err) {
-        return console.error(err.message);
+        console.error(err.message);
+        return;
     }
-
-    return console.log(JSON.stringify(res, null, 2));
+    console.log(JSON.stringify(repoImgs, null, 4));
 });

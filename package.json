@@ -1,9 +1,9 @@
 {
   "name": "docker-registry-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Joyent (joyent.com)",
   "private": true,
-  "main": "./lib/clients/index.js",
+  "main": "./lib/index.js",
   "dependencies": {
     "assert-plus": "0.1.5",
     "bunyan": "1.2.0",
