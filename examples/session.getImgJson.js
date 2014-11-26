@@ -18,11 +18,11 @@ docker.createRegistrySession({repo: repo}, function (err, sess) {
         console.error(err.message);
         return;
     }
-    sess.listRepoTags(function (err, repoTags) {
+    sess.listRepoTags(function (listErr, repoTags) {
         var latest = repoTags['latest'];
-        sess.getImgJson({imgId: latest}, function (err, imgJson, res) {
-            if (err) {
-                console.error(err.message);
+        sess.getImgJson({imgId: latest}, function (getErr, imgJson, res) {
+            if (getErr) {
+                console.error(getErr.message);
                 return;
             }
             console.log(JSON.stringify(imgJson, null, 4));

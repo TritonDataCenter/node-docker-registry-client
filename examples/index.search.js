@@ -12,13 +12,12 @@
 
 var docker = require('../');
 
-var repo = 'library/mongo';
-docker.createRegistrySession({repo: repo}, function (err, sess) {
+var term = 'cadvisor';
+var idx = docker.createIndexClient();
+idx.search({term: term}, function (err, images, res) {
     if (err) {
         console.error(err.message);
         return;
     }
-    sess.listRepoTags(function (listErr, repoTags) {
-        console.log(JSON.stringify(repoTags, null, 4));
-    });
+    console.log(JSON.stringify(images, null, 4));
 });
