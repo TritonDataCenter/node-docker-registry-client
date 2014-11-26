@@ -1,11 +1,13 @@
 # node-docker-registry-client
 
 A docker registry client for node.js.
-*Warning:* this is pre-alpha.
+*Warning:* this is beta.
 Limitation: Only some of the methods of each API are implemented.
 
 tl;dr: See the [Registry session](#registry-session) section below.
 
+
+## Intro
 
 The "Docker Regsitry" docs are a somewhat confusing affair currently.
 There are two APIs in play: the Index API (sometimes called the "Hub API")
@@ -49,7 +51,7 @@ Some relevant links:
 - <https://docs.docker.com/reference/api/docker-io_api/>
 
 
-# Index client
+## Index client
 
 When you want to talk directly to the [Index
 API](https://docs.docker.com/reference/api/docker-io_api/).
@@ -66,7 +68,7 @@ idx.listRepoImgs({repo: 'library/mongo'}, function (err, imgs, res) {
 See [the source](./lib/index-client.js) for more details.
 
 
-# Registry client
+## Registry client
 
 When you want to talk to unauthenticated endpoints of the
 [Registry API](https://docs.docker.com/reference/api/registry_api/).
@@ -86,8 +88,7 @@ Note: Typical usage of the registry API is via a session as most endpoints
 require an authorization token. See the "Registry session" section below.
 
 
-
-# Registry session
+## Registry session
 
 When you want to talk to *authenticated* endpoints of the
 [Registry API](https://docs.docker.com/reference/api/registry_api/).
@@ -110,7 +111,7 @@ See [the source](./lib/registry-client.js) for more details.
 
 
 
-# Open Questions
+## Open Questions
 
 - Am I bastardizing the term "image" by calling each layer an image? Is it only
   an "image" in Docker-land if it has a tag associated with it?
@@ -126,7 +127,7 @@ See [the source](./lib/registry-client.js) for more details.
     - <https://docs.docker.com/reference/api/docker-io_api/#user-login>
 
 
-# Dev Notes
+## Dev Notes
 
-For naming this attempts to consistently use `repo` for repository, `img` for
+For naming this package attempts to consistently use `repo` for repository, `img` for
 image, etc.
