@@ -9,13 +9,8 @@
 #
 
 #
-# node-docker-client Makefile
+# node-docker-registry-client Makefile
 #
-
-#
-# Tools
-#
-TAP		:= ./node_modules/.bin/tap
 
 #
 # Files
@@ -34,17 +29,12 @@ include ./tools/mk/Makefile.defs
 # Repo-specific targets
 #
 .PHONY: all
-all: $(SMF_MANIFESTS) | $(TAP) $(REPO_DEPS)
-	$(NPM) rebuild
-
-$(TAP): | $(NPM_EXEC)
-	$(NPM) install
-
-CLEAN_FILES += $(TAP) ./node_modules/tap
+all:
+	npm install
 
 .PHONY: test
-test: $(TAP)
-	TAP=1 $(TAP) test/*.test.js
+test:
+	echo "nothing here :("
 
 
 include ./tools/mk/Makefile.deps
