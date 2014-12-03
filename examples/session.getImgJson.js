@@ -11,16 +11,31 @@
  */
 
 var docker = require('../');
+var bunyan = require('bunyan');
 
-var repo = 'library/mongo';
-docker.createRegistrySession({repo: repo}, function (err, sess) {
+var log;
+if (process.env.TRACE) {
+    log = bunyan.createLogger({
+        name: require('path').basename(__filename),
+        level: 'trace'
+    });
+}
+
+// Default to "library/mongo:latest".
+var rat = docker.parseRepoAndTag(
+        process.argv.length > 2 ? process.argv[2] : 'mongo');
+
+docker.createRegistrySession({repo: rat.repo, log: log},
+                            function (err, sess, repoImgs) {
     if (err) {
         console.error(err.message);
         return;
     }
     sess.listRepoTags(function (listErr, repoTags) {
-        var latest = repoTags['latest'];
-        sess.getImgJson({imgId: latest}, function (getErr, imgJson, res) {
+        // The `|| rat.tag` is a hack to allow passing in a specific untagged
+        // imgId.
+        var imgId = repoTags[rat.tag] || rat.tag;
+        sess.getImgJson({imgId: imgId}, function (getErr, imgJson, res) {
             if (getErr) {
                 console.error(getErr.message);
                 return;
@@ -28,7 +43,16 @@ docker.createRegistrySession({repo: repo}, function (err, sess) {
             console.log(JSON.stringify(imgJson, null, 4));
             console.log(JSON.stringify(res.headers, null, 4));
             console.log('size:', res.headers['x-docker-size']);
-            console.log('checksum:', res.headers['x-docker-payload-checksum']);
+
+            // If present, dump the checksum from the `repoImgs` data from the
+            // *index* API.
+            var checksum;
+            var repoImg = repoImgs.filter(
+                function (ri) { return ri.id === imgId; });
+            if (repoImg.length) {
+                checksum = repoImg.checksum;
+            }
+            console.log('checksum (from Index API):', checksum || '(none)');
         });
     });
 });

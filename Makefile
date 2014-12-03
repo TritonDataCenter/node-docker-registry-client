@@ -34,7 +34,7 @@ all:
 
 .PHONY: test
 test:
-	echo "nothing here :("
+	@echo "nothing here :("
 
 
 include ./tools/mk/Makefile.deps
