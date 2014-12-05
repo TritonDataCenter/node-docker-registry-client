@@ -1,6 +1,7 @@
 {
   "name": "docker-registry-client",
   "version": "0.3.0",
+  "description": "client for the docker Registry and Index APIs",
   "author": "Joyent (joyent.com)",
   "private": true,
   "main": "./lib/index.js",
@@ -10,5 +11,10 @@
     "restify": "2.8.3",
     "vasync": "1.6.1",
     "verror": "1.4.0"
-  }
+  },
+  "engines": {
+    "node": ">=0.10"
+  },
+  "keywords": ["docker", "client", "api", "registry", "index", "hub"],
+  "license": "MPL-2.0"
 }
