@@ -12,7 +12,8 @@
 
 var docker = require('../');
 
-var repo = 'library/mongo';
+var repo = process.argv.length > 2 ? process.argv[2] : 'library/mongo';
+
 docker.createRegistrySession({repo: repo}, function (err, sess) {
     if (err) {
         console.error(err.message);
