@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 0.3.1
+
+- Switch to '^x.y.x' for deps to allow for node\_modules dedupe in
+  apps using this module.
+
 ## 0.3.0
 
 - Add `RegistrySession.getImgId()`, `parseRepoAndTag()`,
