@@ -9,8 +9,8 @@
     "assert-plus": "^0.1.5",
     "bunyan": "1.x >=1.3.3",
     "restify": "2.8.x >=2.8.5",
-    "vasync": "^1.6.1",
-    "verror": "^1.4.0"
+    "vasync": "1.x >=1.6.1",
+    "verror": "1.x >=1.6.0"
   },
   "engines": {
     "node": ">=0.10"
