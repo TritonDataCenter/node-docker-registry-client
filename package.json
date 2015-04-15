@@ -1,20 +1,27 @@
 {
-  "name": "docker-registry-client",
-  "version": "0.3.2",
-  "description": "client for the docker Registry and Index APIs",
-  "author": "Joyent (joyent.com)",
-  "private": true,
-  "main": "./lib/index.js",
-  "dependencies": {
-    "assert-plus": "^0.1.5",
-    "bunyan": "1.x >=1.3.3",
-    "restify": "2.8.x >=2.8.5",
-    "vasync": "1.x >=1.6.1",
-    "verror": "1.x >=1.6.0"
-  },
-  "engines": {
-    "node": ">=0.10"
-  },
-  "keywords": ["docker", "client", "api", "registry", "index", "hub"],
-  "license": "MPL-2.0"
+    "name": "docker-registry-client",
+    "version": "0.3.2",
+    "description": "client for the docker Registry and Index APIs",
+    "author": "Joyent (joyent.com)",
+    "private": true,
+    "main": "./lib/index.js",
+    "dependencies": {
+        "assert-plus": "^0.1.5",
+        "bunyan": "1.x >=1.3.3",
+        "restify": "2.8.x >=2.8.5",
+        "vasync": "1.x >=1.6.1",
+        "verror": "1.x >=1.6.0"
+    },
+    "engines": {
+        "node": ">=0.10"
+    },
+    "keywords": [
+        "docker",
+        "client",
+        "api",
+        "registry",
+        "index",
+        "hub"
+    ],
+    "license": "MPL-2.0"
 }
