@@ -36,6 +36,17 @@ all:
 test:
 	@echo "nothing here :("
 
+# Ensure CHANGES.md and package.json have the same version.
+.PHONY: versioncheck
+versioncheck:
+	@echo version is: $(shell cat package.json | json version)
+	[[ `cat package.json | json version` == `grep '^## ' CHANGES.md | head -1 | awk '{print $$2}'` ]]
+
+.PHONY: cutarelease
+cutarelease: versioncheck
+	[[ `git status | tail -n1` == "nothing to commit, working directory clean" ]]
+	./tools/cutarelease.py -p docker-registry-client -f package.json
+
 
 include ./tools/mk/Makefile.deps
 include ./tools/mk/Makefile.targ
