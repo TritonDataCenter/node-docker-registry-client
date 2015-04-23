@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 0.3.2
+## 0.3.2 (not yet released)
 
 - Update deps to move fwd to 0.12-supporting versions of things.
 
