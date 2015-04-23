@@ -3,7 +3,6 @@
   "version": "0.3.2",
   "description": "client for the docker Registry and Index APIs",
   "author": "Joyent (joyent.com)",
-  "private": true,
   "main": "./lib/index.js",
   "dependencies": {
     "assert-plus": "^0.1.5",
