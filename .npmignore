@@ -1,7 +1,9 @@
 /tmp
+/.gitmodules
+/Makefile
 /node_modules
 /examples
 /test
 /tools
 /deps
-/build
+/docker-registry-client-*.tgz
