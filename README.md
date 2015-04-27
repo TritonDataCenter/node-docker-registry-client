@@ -1,15 +1,49 @@
 # node-docker-registry-client
 
 A docker registry client for node.js.
-*Warning:* this is beta.
-Limitation: Only some of the methods of each API are implemented.
+Limitation: Only some of the methods of each API are implemented. Only *v1* of
+the Docker Registry API is current considered.
 
 tl;dr: See the [Registry session](#registry-session) section below.
+
+## XXX auth
+
+	// If we're working with a standalone private registry over HTTPS, send Basic Auth headers
+	// alongside our requests.
+	if r.indexEndpoint.VersionString(1) != IndexServerAddress() && r.indexEndpoint.URL.Scheme == "https" {
+		info, err := r.indexEndpoint.Ping()
+		if err != nil {
+			return nil, err
+		}
+		if info.Standalone {
+			logrus.Debugf("Endpoint %s is eligible for private registry. Enabling decorator.", r.indexEndpoint.String())
+			dec := requestdecorator.NewAuthDecorator(authConfig.Username, authConfig.Password)
+			factory.AddDecorator(dec)
+		}
+	}
+
+also:   isSecure handling
+also:   timeout talking to registry
+
+
+Basic Auth usage in session.go:
+    - NewSession: if indexEndpoint is https and other than index.docker.io, and
+      "standalone" (from Ping, the X-Docker-Registry-Standalone header, means
+      "don't use index.docker.io, i.e. don't use token auth)
+    - always for PUT /repositories/$image/[images]
+      Not sure this is relevant for us now.
+    - IndexClient.search (if have creds, X-Docker-Token:true)
+    - GetRepositoryData ... which is our IndexClient.getRepoAuth
+
+Ah... perhaps the X-Docker-Token effectively encodes the login details
+for that session. IOW: docker hub uses token auth, other repos don't, they
+use basic auth.
+
 
 
 ## Intro
 
-The "Docker Regsitry" docs are a somewhat confusing affair currently.
+The "Docker Registry" docs are a somewhat confusing affair currently.
 There are two APIs in play: the Index API (sometimes called the "Hub API")
 and the Registry API. There are a few auth-related endpoints and headers.
 "Image" is commonly used when referring to a repo. "The Registry" is
@@ -51,6 +85,24 @@ Some relevant links:
 - <https://docs.docker.com/reference/api/docker-io_api/>
 
 
+## XXX New Registry client
+
+```javascript
+var drc = require('docker-registry-client');
+var reg = drc.createClient();  // default https://registry-1.docker.io
+reg.ping(function (err, status, res) {  // a.k.a. `getStatus`
+    console.log('status:', status);
+    console.log('HTTP status:', res.statusCode);
+});
+
+reg.
+```
+
+TODO: example using implicit token auth
+TODO: example showing the index/repo:tag parsing
+
+
+
 ## Index client
 
 When you want to talk directly to the [Index
@@ -73,6 +125,7 @@ See [the source](./lib/index-client.js) for more details.
 When you want to talk to unauthenticated endpoints of the
 [Registry API](https://docs.docker.com/reference/api/registry_api/).
 
+
 ```javascript
 var docker = require('docker-registry-client');
 var reg = docker.createRegistryClient();  // default https://registry-1.docker.io
@@ -81,6 +134,23 @@ reg.getStatus(function (err, body, res) {
     console.log('HTTP status:', res.statusCode);
 });
 ```
+
+XXX This abstraction and hardcoding is wrong. Change to equiv of
+   repoInfo.GetEndpoint()
+
+```javascript
+var drc = require('docker-registry-client');
+var client = drc.createClient()  // XXX have default to index client, all starts there, takes 'name' and 'secure'
+var endpoint = client.getEndpoint()
+    XXX  dunno, need feel from other command traces first
+var reg = drc.createRegistryClient();  // default https://registry-1.docker.io
+reg.getStatus(function (err, body, res) {
+    console.log('status:', body);
+    console.log('HTTP status:', res.statusCode);
+});
+```
+
+
 
 See [the source](./lib/registry-client.js) for more details.
 

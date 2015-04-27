@@ -22,6 +22,12 @@ JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS	 = -f tools/jsstyle.conf
 
+#
+# Tools
+#
+TAPE := ./node_modules/.bin/tape
+
+
 include ./tools/mk/Makefile.defs
 
 
@@ -33,8 +39,8 @@ all:
 	npm install
 
 .PHONY: test
-test:
-	@echo "nothing here :("
+test: | $(TAPE)
+	@$(TAPE) test/*.test.js
 
 # Ensure CHANGES.md and package.json have the same version.
 .PHONY: versioncheck

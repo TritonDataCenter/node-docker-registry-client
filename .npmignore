@@ -7,3 +7,4 @@
 /tools
 /deps
 /docker-registry-client-*.tgz
+*.layer

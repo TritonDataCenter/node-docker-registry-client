@@ -1,6 +1,70 @@
 # node-docker-registry-client Changelog
 
+## 1.0.0 (not yet released)
+
+Current status: not yet complete.
+
+A major re-write with lots of backwards compat *breakage*.  This release adds
+support for indeces/registries other than the "official" docker.io default.
+It changes usage to feel a bit more like docker/docker.git's "registry" package.
+So far this still only supports Registry API v1.
+
+
+- **Backward incompat change** in return value from `parseRepoAndTag`.
+  In addition to adding support for the optional index prefix, and a
+  "@DIGEST" suffix, the fields on the return value have been changed to
+  more closely match Docker's `RepositoryInfo` fields:
+
+        {
+            index: {
+                name: INDEX_NAME
+                official: BOOL
+            },
+            remoteName: ...,
+            localName: ...,
+            canonicalName: ...,
+            official: BOOL
+        }
+
+  E.g.
+
+        {
+            index: {
+                name: 'docker.io'
+                official: true
+            },
+            remoteName: 'library/mongo',
+            localName: 'mongo',
+            canonicalName: 'docker.io/mongo',
+            official: true
+        }
+
+  See <https://github.com/docker/docker/blob/2e4d36ed80855375231501983f19616ba0238a84/registry/types.go#L71-L96>
+  for an example.
+
+  Before:
+
+        {
+            ns: NS,
+            name: NAME,
+            repo: NS/NAME,
+            tag: TAG || 'latest'
+        }
+
+  e.g.:
+
+        {
+            ns: 'library',
+            name: 'mongo',
+            repo: 'library/mongo',
+            tag: '1.2.3'
+        }
+
+
+
 ## 0.3.2
+
+Note: Any 0.x work (I don't anticipate any) will be on the "0.x" branch.
 
 - Update deps to move fwd to 0.12-supporting versions of things.
 
