@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 1.0.0 (not yet released)
+## 1.0.0
 
 Current status: not yet complete.
 
