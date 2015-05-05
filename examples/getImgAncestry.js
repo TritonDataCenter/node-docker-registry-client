@@ -18,8 +18,8 @@ var cmd = 'getImgAncestry';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     if (!args[0] || (args[0].indexOf(':') === -1 && !args[1])) {
         console.error('usage:\n' +
-            '    node examples/%s REPO:TAG\n' +
-            '    node examples/%s REPO IMAGE-ID\n' +
+            '    node examples/%s.js REPO:TAG\n' +
+            '    node examples/%s.js REPO IMAGE-ID\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, cmd, parser.help().trimRight());
@@ -33,6 +33,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         // Lookup by REPO:TAG.
         var rat = drc.parseRepoAndTag(args[0]);
         client = drc.createClient({
+            scheme: rat.index.scheme,
             name: rat.canonicalName,
             agent: false,
             log: log,

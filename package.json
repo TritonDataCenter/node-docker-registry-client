@@ -1,7 +1,7 @@
 {
     "name": "docker-registry-client",
     "version": "1.0.0",
-    "description": "client for the docker Registry and Index APIs",
+    "description": "client for the Docker Registry API",
     "author": "Joyent (joyent.com)",
     "private": true,
     "main": "./lib/index.js",

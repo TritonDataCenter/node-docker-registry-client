@@ -97,6 +97,51 @@ test('parseRepoAndTag', function (t) {
         "digest": "sha256:cafebabe"
     });
 
+    // With alternate default index.
+    t.deepEqual(parseRepoAndTag('foo/bar', 'docker.io'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "foo/bar",
+        "canonicalName": "docker.io/foo/bar",
+        "tag": "latest"
+    });
+
+    var defaultIndex = 'https://myreg.example.com:1234';
+    t.deepEqual(parseRepoAndTag('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar",
+        "tag": "latest"
+    });
+
+    defaultIndex = {
+        "scheme": "https",
+        "name": "myreg.example.com:1234",
+        "official": false
+    };
+    t.deepEqual(parseRepoAndTag('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar",
+        "tag": "latest"
+    });
+
     t.end();
 });
 
@@ -144,6 +189,107 @@ test('parseRepo', function (t) {
         "localName": "localhost:5000/blarg",
         "canonicalName": "localhost:5000/blarg"
     });
+
+    // With alternate default index.
+    t.deepEqual(parseRepo('foo/bar', 'docker.io'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "foo/bar",
+        "canonicalName": "docker.io/foo/bar"
+    });
+
+    var defaultIndex = 'https://myreg.example.com:1234';
+    t.deepEqual(parseRepo('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar"
+    });
+
+    defaultIndex = {
+        "scheme": "https",
+        "name": "myreg.example.com:1234",
+        "official": false
+    };
+    t.deepEqual(parseRepo('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar"
+    });
+
+    t.end();
+});
+
+
+test('parseIndex', function (t) {
+    var parseIndex = common.parseIndex;
+
+    t.deepEqual(parseIndex('docker.io'), {
+        "name": "docker.io",
+        "official": true
+    });
+    t.deepEqual(parseIndex('index.docker.io'), {
+        "name": "docker.io",
+        "official": true
+    });
+    t.deepEqual(parseIndex('https://docker.io'), {
+        "name": "docker.io",
+        "official": true,
+        "scheme": "https"
+    });
+    t.throws(function () { parseIndex('http://docker.io'); },
+        /disallowed/);
+    t.deepEqual(parseIndex('index.docker.io'), {
+        "name": "docker.io",
+        "official": true
+    });
+    t.deepEqual(parseIndex('quay.io'), {
+        "name": "quay.io",
+        "official": false
+    });
+    t.deepEqual(parseIndex('https://quay.io'), {
+        "name": "quay.io",
+        "official": false,
+        "scheme": "https"
+    });
+    t.deepEqual(parseIndex('http://quay.io'), {
+        "name": "quay.io",
+        "official": false,
+        "scheme": "http"
+    });
+    t.deepEqual(parseIndex('localhost:5000'), {
+        "name": "localhost:5000",
+        "official": false
+    });
+
+    t.throws(function () { parseIndex('https://'); },
+        /empty/);
+    t.throws(function () { parseIndex('https://foo'); },
+        /look/);
+    t.throws(function () { parseIndex('foo'); },
+        /look/);
+
+    t.deepEqual(parseIndex('docker.io/'), {
+        "name": "docker.io",
+        "official": true
+    });
+    t.throws(function () { parseIndex('docker.io/foo'); },
+        /invalid/);
 
     t.end();
 });

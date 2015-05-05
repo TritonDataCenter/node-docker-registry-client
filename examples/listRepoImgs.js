@@ -18,7 +18,7 @@ var cmd = 'listRepoImgs';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     var name = args[0];
     if (!name) {
-        console.error('usage: node examples/%s REPO\n' +
+        console.error('usage: node examples/%s.js REPO\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());

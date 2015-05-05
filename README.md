@@ -1,69 +1,38 @@
 # node-docker-registry-client
 
-A docker registry client for node.js.
-Limitation: Only some of the methods of each API are implemented. Only *v1* of
-the Docker Registry API is current considered.
+A Docker Registry API client for node.js.
+Limitation: Currently on v1 of the Registry API is implemented. Support for v2
+is planned.
 
-tl;dr: See the [Registry session](#registry-session) section below.
-
-## XXX auth
-
-	// If we're working with a standalone private registry over HTTPS, send Basic Auth headers
-	// alongside our requests.
-	if r.indexEndpoint.VersionString(1) != IndexServerAddress() && r.indexEndpoint.URL.Scheme == "https" {
-		info, err := r.indexEndpoint.Ping()
-		if err != nil {
-			return nil, err
-		}
-		if info.Standalone {
-			logrus.Debugf("Endpoint %s is eligible for private registry. Enabling decorator.", r.indexEndpoint.String())
-			dec := requestdecorator.NewAuthDecorator(authConfig.Username, authConfig.Password)
-			factory.AddDecorator(dec)
-		}
-	}
-
-also:   isSecure handling
-also:   timeout talking to registry
+XXX docs are out of date for the 1.0.0 re-write.
 
 
-Basic Auth usage in session.go:
-    - NewSession: if indexEndpoint is https and other than index.docker.io, and
-      "standalone" (from Ping, the X-Docker-Registry-Standalone header, means
-      "don't use index.docker.io, i.e. don't use token auth)
-    - always for PUT /repositories/$image/[images]
-      Not sure this is relevant for us now.
-    - IndexClient.search (if have creds, X-Docker-Token:true)
-    - GetRepositoryData ... which is our IndexClient.getRepoAuth
+## Terminology
 
-Ah... perhaps the X-Docker-Token effectively encodes the login details
-for that session. IOW: docker hub uses token auth, other repos don't, they
-use basic auth.
+(I'm talking v1 here. v2 support will come later.)
 
-
-
-## Intro
-
-The "Docker Registry" docs are a somewhat confusing affair currently.
-There are two APIs in play: the Index API (sometimes called the "Hub API")
-and the Registry API. There are a few auth-related endpoints and headers.
-"Image" is commonly used when referring to a repo. "The Registry" is
-often used when referring to the docker Hub/Index.
-
-There is a single global index managed by Docker, Inc:
-<https://index.docker.io>, for which <https://hub.docker.com> is a web front
-end. Then there can be any number of registries. Currently the one
-managed by Docker, Inc. is at <https://registry-1.docker.io>.
+The "Docker Registry" docs can be a little confusing. There are two APIs in
+play: the Index API (sometimes called the "Hub API") and the Registry API. There
+are a few auth-related endpoints and headers. Standalone registries (i.e. those
+not connected with Docker Hub) and Docker Hub use different auth mechanisms.
+"Image" is commonly used when referring to a repo. "The Registry" is often used
+when referring to the docker Hub/Index. My understanding with v2 work is that
+the concept of "Index" as separate from "Registry" is going away, though
+the field name "Index" remains in code (both in docker.git and in this
+module for comparability).
 
 Working with Docker images involves the following types of things:
 
-- index: The central place to find where a given repository of images is hosted
-  (i.e. what Registry API holds the image data).
+- index: The central Docker Hub API to handle Token-based auth for registries
+  associated with Docker Hub (this seems to be only used by Docker Hub itself)
+  and (theoretically) discovery of repositores in various registries.
+- registry: A server that holds Docker image repositories.
 - repositories: Images are grouped into named `repos`, e.g.
   ["google/python"](https://registry.hub.docker.com/u/google/python/),
   ["library/mongo"](https://registry.hub.docker.com/u/library/mongo/).
-  Repos in the "library" `namespace` are official repos managed by Docker, Inc.
-  All the images (that is to say, the image *data*) in a given repository
-  are hosted by a single registry.
+  On the "official" Docker Hub registry the "library" `namespace` are
+  special "official" repos managed by Docker, Inc. All the images (that is to
+  say, the image *data*) in a given repository are hosted by a single registry.
 - repository tags: A repository typically tags a set of its images with
   short names, e.g. "2.7" in "library/mongo:2.7". Tags are commonly used in
   the docker CLI when running containers. If a tag isn't specified the "latest"
@@ -77,6 +46,9 @@ Working with Docker images involves the following types of things:
   in layers.  Each image has a parent, until the base layer. This chain
   forms the "history" (see `docker history <image>`), aka "ancestry"
   (see <https://docs.docker.com/reference/api/registry_api/#get-image-ancestry>).
+  With Docker Registry API v2 these won't be interchangeable in the
+  registry implementation, but for compat with older Docker the separate ID
+  for each layer remains.
 
 Some relevant links:
 
@@ -85,119 +57,99 @@ Some relevant links:
 - <https://docs.docker.com/reference/api/docker-io_api/>
 
 
-## XXX New Registry client
+## Names
 
-```javascript
-var drc = require('docker-registry-client');
-var reg = drc.createClient();  // default https://registry-1.docker.io
-reg.ping(function (err, status, res) {  // a.k.a. `getStatus`
-    console.log('status:', status);
-    console.log('HTTP status:', res.statusCode);
-});
+Most usage of this package involves creating a Registry client and calling
+its methods. A Registry client requires a repository name:
 
-reg.
-```
+    [INDEX/]NAME                # a "repo name"
 
-TODO: example using implicit token auth
-TODO: example showing the index/repo:tag parsing
+Examples:
+
+    mongo                       # implies default index (docker.io) and namespace (library)
+    docker.io/mongo             # same thing
+    docker.io/library/mongo     # same thing
+
+    myreg.example.com:5000/busybox   # a "busybox" repo on a private registry
+
+The `parseRepo` function is used to parse these. See "examples/parseRepo.js"
+to see how they are parsed:
+
+    $ node examples/parseRepo.js mongo
+    {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": true,
+        "remoteName": "library/mongo",
+        "localName": "mongo",
+        "canonicalName": "docker.io/mongo"
+    }
 
 
+Commonly, a "repo name and tag" string is used for working with a Docker
+registry, e.g. `docker pull busybox:latest`. This package provides
+`parseRepoAndTag` for that, e.g.:
 
-## Index client
+    $ node examples/parseRepoAndTag.js myreg.example.com:5000/busybox:foo
+    {
+        "index": {
+            "name": "myreg.example.com:5000",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "busybox",
+        "localName": "myreg.example.com:5000/busybox",
+        "canonicalName": "myreg.example.com:5000/busybox",
+        "tag": "foo"
+    }
 
-When you want to talk directly to the [Index
-API](https://docs.docker.com/reference/api/docker-io_api/).
 
-```javascript
-var docker = require('docker-registry-client');
-var idx = docker.createIndexClient();  // defaults to https://index.docker.io
-idx.listRepoImgs({repo: 'library/mongo'}, function (err, imgs, res) {
-    console.log('imgs:', imgs)
-    console.log('headers:', res.headers)
-});
-```
+Slightly different than docker.git's parsing, this package allows the
+scheme to be given on the index:
 
-See [the source](./lib/index-client.js) for more details.
+
+    $ node examples/parseRepoAndTag.js https://quay.io/trentm/foo
+    {
+        "index": {
+            "scheme": "https",              // <--- scheme
+            "name": "quay.io",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "trentm/foo",
+        "localName": "quay.io/trentm/foo",
+        "canonicalName": "quay.io/trentm/foo",
+        "tag": "latest"                     // <--- default to 'latest' tag
+    }
 
 
 ## Registry client
 
-When you want to talk to unauthenticated endpoints of the
-[Registry API](https://docs.docker.com/reference/api/registry_api/).
+Typically:
+
+    var client = drc.createClient({
+        name: name,
+        agent: false,              // optional
+        log: log,                  // optional
+        username: opts.username,   // optional
+        password: opts.password,   // optional
+        // ... see the source code
+    });
+    client.listRepoTags(function (err, repoTags) {
+        if (err) {
+            console.log(err);
+            process.exit(1);
+        }
+        console.log(JSON.stringify(repoTags, null, 4));
+    });
 
 
-```javascript
-var docker = require('docker-registry-client');
-var reg = docker.createRegistryClient();  // default https://registry-1.docker.io
-reg.getStatus(function (err, body, res) {
-    console.log('status:', body);
-    console.log('HTTP status:', res.statusCode);
-});
-```
-
-XXX This abstraction and hardcoding is wrong. Change to equiv of
-   repoInfo.GetEndpoint()
-
-```javascript
-var drc = require('docker-registry-client');
-var client = drc.createClient()  // XXX have default to index client, all starts there, takes 'name' and 'secure'
-var endpoint = client.getEndpoint()
-    XXX  dunno, need feel from other command traces first
-var reg = drc.createRegistryClient();  // default https://registry-1.docker.io
-reg.getStatus(function (err, body, res) {
-    console.log('status:', body);
-    console.log('HTTP status:', res.statusCode);
-});
-```
-
-
-
-See [the source](./lib/registry-client.js) for more details.
-
-Note: Typical usage of the registry API is via a session as most endpoints
-require an authorization token. See the "Registry session" section below.
-
-
-## Registry session
-
-When you want to talk to *authenticated* endpoints of the
-[Registry API](https://docs.docker.com/reference/api/registry_api/).
-Dev Note: This attempts to conform loosely to [session.go in docker
-core](https://github.com/docker/docker/blob/master/registry/session.go).
-
-```javascript
-var docker = require('docker-registry-client');
-
-// Creation of a session involves requesting a token from index.docker.io
-// and getting the registry endpoint URL from that response.
-docker.createRegistrySession({repo: 'library/mongo'}, function (err, session) {
-    session.listRepoTags(function (err, tags) {
-        console.log('mongo image tags:', tags)
-    })
-});
-```
-
-See [the source](./lib/registry-client.js) for more details.
-
-
-
-## Open Questions
-
-- Am I bastardizing the term "image" by calling each layer an image? Is it only
-  an "image" in Docker-land if it has a tag associated with it?
-
-- What are the validation rules for: repo namespaces, repo names, tags?
-
-- Why each of these auth endpoints?
-
-    - <https://docs.docker.com/reference/api/docker-io_api/#authorize-a-token-for-a-user-repository>
-    - X-Docker-Token:true to this endpoint: <https://docs.docker.com/reference/api/docker-io_api/#list-library-repository-images>
-      per discussion at <https://docs.docker.com/reference/api/hub_registry_spec/#pull>
-
-    - <https://docs.docker.com/reference/api/docker-io_api/#user-login>
+See "examples/" for example usage of all (most?) of the API.
 
 
 ## Dev Notes
 
-For naming this package attempts to consistently use `repo` for repository, `img` for
-image, etc.
+For naming this package attempts to consistently use `repo` for repository,
+`img` for image, etc.

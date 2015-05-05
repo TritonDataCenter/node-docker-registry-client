@@ -25,7 +25,7 @@ var cmd = 'search';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     var name = args[0];
     if (!name) {
-        console.error('usage: node examples/%s [INDEX/]TERM\n' +
+        console.error('usage: node examples/%s.js [INDEX/]TERM\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());

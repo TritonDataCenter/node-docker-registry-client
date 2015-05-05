@@ -9,6 +9,16 @@ support for indeces/registries other than the "official" docker.io default.
 It changes usage to feel a bit more like docker/docker.git's "registry" package.
 So far this still only supports Registry API v1.
 
+Basically the whole usage has changed. There is no longer a "Registry Session",
+session handling is done lazily under the hood. There is no longer a separate
+"Index API Client", the only client object is the "RegistryClient" setup via:
+
+    var client = drc.createClient({...});
+
+There *is* a `drc.pingIndex()` which can be used to check that a registry
+host (aka an "index" from the old separation of an "Index API") is up.
+Usage is best learned from the complete set of examples in "examples/".
+
 
 - **Backward incompat change** in return value from `parseRepoAndTag`.
   In addition to adding support for the optional index prefix, and a

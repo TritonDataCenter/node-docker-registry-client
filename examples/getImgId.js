@@ -18,19 +18,20 @@ var cmd = 'getImgId';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     var repoAndTag = args[0];
     if (!repoAndTag) {
-        console.error('usage: node examples/%s REPO:TAG\n' +
+        console.error('usage: node examples/%s.js REPO:TAG\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());
         process.exit(2);
     }
 
+    // The interesting stuff starts here.
     var rat = drc.parseRepoAndTag(repoAndTag);
     console.error('# repo: %s', rat.canonicalName);
     console.error('# tag:  %s', rat.tag);
 
-    // The interesting stuff starts here.
     var client = drc.createClient({
+        scheme: rat.index.scheme,
         name: rat.canonicalName,
         agent: false,
         log: log,
@@ -43,6 +44,4 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         }
         console.log(imgId);
     });
-
-
 });

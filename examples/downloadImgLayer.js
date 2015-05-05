@@ -21,8 +21,8 @@ var cmd = 'downloadImgLayer';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     if (!args[0] || (args[0].indexOf(':') === -1 && !args[1])) {
         console.error('usage:\n' +
-            '    node examples/%s REPO:TAG\n' +
-            '    node examples/%s REPO IMAGE-ID\n' +
+            '    node examples/%s.js REPO:TAG\n' +
+            '    node examples/%s.js REPO IMAGE-ID\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, cmd, parser.help().trimRight());
@@ -37,6 +37,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         var rat = drc.parseRepoAndTag(args[0]);
         console.log('Repo:', rat.canonicalName);
         client = drc.createClient({
+            scheme: rat.index.scheme,
             name: rat.canonicalName,
             agent: false,
             log: log,
@@ -99,17 +100,13 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         });
 
         stream.on('error', function (err) {
-            console.error('Error downloading:', err);
-            // XXX fail here?
+            mainline.fail(cmd, 'error downloading: ' + err);
         });
         fout.on('error', function (err) {
-            console.error('Error writing:', err);
-            // XXX fail here?
+            mainline.fail(cmd, 'error writing: ' + err);
         });
 
         stream.pipe(fout);
-        //XXX need this?
-        //stream.resume();
+        stream.resume();
     }
-
 });

@@ -18,7 +18,7 @@ var cmd = 'ping';
 mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     var name = args[0];
     if (!name) {
-        console.error('usage: node examples/%s REPO\n' +
+        console.error('usage: node examples/%s.js REPO\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());
@@ -31,7 +31,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
         agent: false,
         log: log
     });
-    reg.ping(function (err, status, res) {   // a.k.a. `reg.getStatus()`
+    reg.ping(function (err, status, res) {
         if (err) {
             mainline.fail(cmd, err);
         }
