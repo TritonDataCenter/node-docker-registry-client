@@ -42,6 +42,10 @@ all:
 test: | $(TAPE)
 	@$(TAPE) test/*.test.js
 
+.PHONY: clean
+clean::
+	rm -f *.layer examples/*.layer docker-registry-client-*.tgz
+
 # Ensure CHANGES.md and package.json have the same version.
 .PHONY: versioncheck
 versioncheck:
@@ -49,7 +53,7 @@ versioncheck:
 	[[ `cat package.json | json version` == `grep '^## ' CHANGES.md | head -1 | awk '{print $$2}'` ]]
 
 .PHONY: cutarelease
-cutarelease: versioncheck
+cutarelease: clean versioncheck
 	[[ `git status | tail -n1` == "nothing to commit, working directory clean" ]]
 	./tools/cutarelease.py -p docker-registry-client -f package.json
 
