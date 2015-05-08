@@ -1,8 +1,14 @@
 # node-docker-registry-client Changelog
 
-## 1.0.1 (not yet released)
+## 1.1.0 (not yet released)
 
-(nothing yet)
+- `RegistryClient.ping` will not retry so that a ping failure check is quick.
+  Without this it was retrying for ~15s.
+- `RegistryClient.search` now does a ping check before searching (fail fast).
+- `createClient({userAgent: ...})` option. Defaults to
+  'node-docker-registry-client/$ver (...)'.
+- A client to localhost will default to the 'http' scheme to (mostly) match
+  docker-docker's behaviour here.
 
 
 ## 1.0.0
