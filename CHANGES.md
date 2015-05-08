@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 1.1.1 (not yet released)
+
+(nothing yet)
+
+
 ## 1.1.0
 
 - `RegistryClient.ping` will not retry so that a ping failure check is quick.
