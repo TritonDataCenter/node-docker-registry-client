@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 1.2.1 (not yet released)
+
+(nothing yet)
+
+
 ## 1.2.0
 
 - Add `drc.login(...)` for handling a Docker Engine would use for the Remote
