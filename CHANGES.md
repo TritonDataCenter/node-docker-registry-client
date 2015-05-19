@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 1.2.2 (not yet released)
+
+(nothing yet)
+
+
 ## 1.2.1
 
 - Sanitize the non-json (text/html) `err.message` from `listRepoImgs` on a 404.
