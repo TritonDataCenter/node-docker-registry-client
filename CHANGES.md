@@ -1,8 +1,9 @@
 # node-docker-registry-client Changelog
 
-## 1.1.1 (not yet released)
+## 1.2.0 (not yet released)
 
-(nothing yet)
+- Add `drc.login(...)` for handling a Docker Engine would use for the Remote
+  API side of `docker login`.
 
 
 ## 1.1.0
@@ -17,8 +18,6 @@
 
 
 ## 1.0.0
-
-Current status: not yet complete.
 
 A major re-write with lots of backwards compat *breakage*.  This release adds
 support for indeces/registries other than the "official" docker.io default.
