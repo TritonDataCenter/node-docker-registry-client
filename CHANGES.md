@@ -2,7 +2,8 @@
 
 ## 1.2.1 (not yet released)
 
-(nothing yet)
+- Sanitize the non-json (text/html) `err.message` from `listRepoImgs` on a 404.
+  See before and after: https://gist.github.com/trentm/94c11e1243fb7fd4fe90
 
 
 ## 1.2.0
