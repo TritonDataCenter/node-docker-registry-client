@@ -2,7 +2,7 @@
 
 ## 1.2.2 (not yet released)
 
-(nothing yet)
+- [pull #4] Fix `getImgAncestry` when using node 0.12 (by github.com/vincentwoo).
 
 
 ## 1.2.1
