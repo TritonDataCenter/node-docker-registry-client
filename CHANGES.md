@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 1.2.2 (not yet released)
+## 1.2.2
 
 - [pull #4] Fix `getImgAncestry` when using node 0.12 (by github.com/vincentwoo).
 
