@@ -28,10 +28,10 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     // The interesting stuff starts here.
     var reg = drc.createClient({
         name: name,
-        agent: false,
         log: log
     });
     reg.ping(function (err, status, res) {
+        reg.close();
         if (err) {
             mainline.fail(cmd, err);
         }

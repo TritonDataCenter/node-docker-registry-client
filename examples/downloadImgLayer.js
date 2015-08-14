@@ -39,7 +39,6 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         client = drc.createClient({
             scheme: rat.index.scheme,
             name: rat.canonicalName,
-            agent: false,
             log: log,
             username: opts.username,
             password: opts.password
@@ -57,7 +56,6 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         console.log('Repo:', args[0]);
         client = drc.createClient({
             name: args[0],
-            agent: false,
             log: log,
             username: opts.username,
             password: opts.password
@@ -80,6 +78,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
         var fout = fs.createWriteStream(shortId + '.layer');
         fout.on('finish', function () {
+            client.close();
             console.log('Done downloading image layer.');
             var len = Number(stream.headers['content-length']);
             if (len !== NaN) {

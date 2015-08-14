@@ -29,12 +29,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     // The interesting stuff starts here.
     var client = drc.createClient({
         name: name,
-        agent: false,
         log: log,
         username: opts.username,
         password: opts.password
     });
     client.listRepoTags(function (err, repoTags) {
+        client.close();
         if (err) {
             mainline.fail(cmd, err);
         }

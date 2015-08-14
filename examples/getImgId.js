@@ -33,12 +33,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     var client = drc.createClient({
         scheme: rat.index.scheme,
         name: rat.canonicalName,
-        agent: false,
         log: log,
         username: opts.username,
         password: opts.password
     });
     client.getImgId({tag: rat.tag}, function (err, imgId) {
+        client.close();
         if (err) {
             mainline.fail(cmd, err);
         }

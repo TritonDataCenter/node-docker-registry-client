@@ -45,14 +45,14 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     p('# index: %j', repo.index.name);
     p('# term: %j', term);
 
-    var reg = drc.createClient({
+    var client = drc.createClient({
         name: name,
-        agent: false,
         log: log,
         username: opts.username,
         password: opts.password
     });
-    reg.search({term: term}, function (err, results, res) {
+    client.search({term: term}, function (err, results, res) {
+        client.close();
         if (err) {
             mainline.fail(cmd, err);
         }

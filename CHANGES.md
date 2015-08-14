@@ -1,8 +1,28 @@
 # node-docker-registry-client Changelog
 
-## 1.2.3 (not yet released)
+## 1.3.0 (not yet released)
 
-(nothing yet)
+- [DOCKER-526] HTTP proxy support. This should work either (a) with the
+  `http_proxy`/`https_proxy` environment variables, or (b) in code like this:
+
+        var url = require('url');
+        var drc = require('docker-registry-client');
+        var client = drc.createClient({
+            name: 'busybox',
+            proxy: url.parse('http://my-proxy.example.com:8080'),
+            //...
+        });
+
+  On side-effect of this change is the underlying HTTP connections no longer
+  set `agent: false` to avoid Node's default HTTP agent. This means that if you
+  are **not** using a proxy, you will now get keep-alive, which means a
+  persistent connection that could hold your node script/app from exiting. All
+  users of this client should explicitly close the client when complete:
+
+        client.close();
+
+  The "example/\*.js" scripts all do this now.
+
 
 
 ## 1.2.2

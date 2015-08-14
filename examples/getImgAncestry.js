@@ -35,7 +35,6 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         client = drc.createClient({
             scheme: rat.index.scheme,
             name: rat.canonicalName,
-            agent: false,
             log: log,
             username: opts.username,
             password: opts.password
@@ -45,6 +44,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                 mainline.fail(cmd, err);
             }
             client.getImgAncestry({imgId: imgId}, function (aErr, ancestry) {
+                client.close();
                 if (aErr) {
                     mainline.fail(cmd, aErr);
                 }
@@ -56,12 +56,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         // Lookup by REPO & IMAGE-ID.
         client = drc.createClient({
             name: args[0],
-            agent: false,
             log: log,
             username: opts.username,
             password: opts.password
         });
         client.getImgAncestry({imgId: args[1]}, function (aErr, ancestry) {
+            client.close();
             if (aErr) {
                 mainline.fail(cmd, aErr);
             }
