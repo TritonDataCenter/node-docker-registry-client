@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 1.3.0 (not yet released)
+## 1.3.0
 
 - [DOCKER-526] HTTP proxy support. This should work either (a) with the
   `http_proxy`/`https_proxy` environment variables, or (b) in code like this:
