@@ -28,6 +28,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     // The interesting stuff starts here.
     var reg = drc.createClient({
         name: name,
+        insecure: opts.insecure,
         log: log
     });
     reg.ping(function (err, status, res) {

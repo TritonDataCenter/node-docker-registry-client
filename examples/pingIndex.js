@@ -26,7 +26,11 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     }
 
     // The interesting stuff starts here.
-    drc.pingIndex({indexName: args[0], log: log}, function (err, status, res) {
+    drc.pingIndex({
+        indexName: args[0],
+        insecure: opts.insecure,
+        log: log
+    }, function (err, status, res) {
         if (err) {
             mainline.fail(cmd, err);
         }

@@ -36,6 +36,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
             scheme: rat.index.scheme,
             name: rat.canonicalName,
             log: log,
+            insecure: opts.insecure,
             username: opts.username,
             password: opts.password
         });
@@ -58,6 +59,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         client = drc.createClient({
             name: args[0],
             log: log,
+            insecure: opts.insecure,
             username: opts.username,
             password: opts.password
         });

@@ -34,6 +34,11 @@ var options = [
         names: ['password', 'p'],
         type: 'string',
         help: 'Basic auth password'
+    },
+    {
+        names: ['insecure', 'k'],
+        type: 'bool',
+        help: 'Allow insecure SSL connections (i.e. do not enforce SSL certs)'
     }
 ];
 
@@ -42,6 +47,11 @@ var optionsNoAuth = [
         names: ['verbose', 'v'],
         type: 'bool',
         help: 'Verbose logging.'
+    },
+    {
+        names: ['insecure', 'k'],
+        type: 'bool',
+        help: 'Allow insecure SSL connections (i.e. do not enforce SSL certs)'
     }
 ];
 

@@ -48,6 +48,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     var client = drc.createClient({
         name: name,
         log: log,
+        insecure: opts.insecure,
         username: opts.username,
         password: opts.password
     });
