@@ -2,6 +2,7 @@
 
 ## 1.3.1 (not yet released)
 
+- DOCKER-539 Allow passing through a proxy for `drc.login(...)`.
 - v1 Ping should send auth headers, if any. A private registry might very well
   require auth on the ping endpoint.
 - v1 Search doesn't need to do a ping. Presumably this is historical for
