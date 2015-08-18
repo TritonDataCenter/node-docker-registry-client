@@ -2,7 +2,10 @@
 
 ## 1.3.1 (not yet released)
 
-(nothing yet)
+- v1 Ping should send auth headers, if any. A private registry might very well
+  require auth on the ping endpoint.
+- v1 Search doesn't need to do a ping. Presumably this is historical for
+  mistakenly thinking there was a need to determine `this.standalone`.
 
 
 ## 1.3.0
