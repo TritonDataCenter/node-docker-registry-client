@@ -108,7 +108,7 @@ vasync.pipeline({funcs: [
         drc.login({
             indexName: indexName,
             log: log,
-            insecure: opts.insecure,
+            // TODO: insecure: insecure,
             // auth info:
             username: username,
             email: email,

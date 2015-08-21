@@ -2,3 +2,4 @@
 /node_modules
 /docker-registry-client-*.tgz
 *.layer
+/test/config.json

@@ -1,7 +1,12 @@
 # node-docker-registry-client Changelog
 
-## 1.3.1 (not yet released)
+## 1.4.0 (not yet released)
 
+- Test suites improvements to actually check against docker.io, quay.io, and
+  optionally a jfrog artifactory Docker v1 repo.
+- DOCKER-380: Support for quay.io. Quay.io uses cookies for repository sessions.
+  This involved refactoring the standalone/token handling to be more generically
+  for "sessions". It simplified the code quite a lot.
 - DOCKER-540 Update examples to take a '-k,--insecure' option to allow
   access to registries with self-signed certs.
 - DOCKER-539 Allow passing through a proxy for `drc.login(...)`.
