@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 1.4.1 (not yet released)
+## 1.4.1
 
 - DOCKER-549 Fix pulling from quay.io *private* repos.
 
