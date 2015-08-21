@@ -1,66 +1,17 @@
 # node-docker-registry-client
 
 A Docker Registry API client for node.js.
-Limitation: Currently on v1 of the Registry API is implemented. Support for v2
-is planned.
-
-XXX docs are out of date for the 1.0.0 re-write.
-
-
-## Terminology
-
-(I'm talking v1 here. v2 support will come later.)
-
-The "Docker Registry" docs can be a little confusing. There are two APIs in
-play: the Index API (sometimes called the "Hub API") and the Registry API. There
-are a few auth-related endpoints and headers. Standalone registries (i.e. those
-not connected with Docker Hub) and Docker Hub use different auth mechanisms.
-"Image" is commonly used when referring to a repo. "The Registry" is often used
-when referring to the docker Hub/Index. My understanding with v2 work is that
-the concept of "Index" as separate from "Registry" is going away, though
-the field name "Index" remains in code (both in docker.git and in this
-module for comparability).
-
-Working with Docker images involves the following types of things:
-
-- index: The central Docker Hub API to handle Token-based auth for registries
-  associated with Docker Hub (this seems to be only used by Docker Hub itself)
-  and (theoretically) discovery of repositores in various registries.
-- registry: A server that holds Docker image repositories.
-- repositories: Images are grouped into named `repos`, e.g.
-  ["google/python"](https://registry.hub.docker.com/u/google/python/),
-  ["library/mongo"](https://registry.hub.docker.com/u/library/mongo/).
-  On the "official" Docker Hub registry the "library" `namespace` are
-  special "official" repos managed by Docker, Inc. All the images (that is to
-  say, the image *data*) in a given repository are hosted by a single registry.
-- repository tags: A repository typically tags a set of its images with
-  short names, e.g. "2.7" in "library/mongo:2.7". Tags are commonly used in
-  the docker CLI when running containers. If a tag isn't specified the "latest"
-  tag is implied -- note that "latest" isn't necessarily the *latest* image.
-  Which image id a tag points to can change over time. The repository tags
-  mapping lives in the registry.
-- image ids: A globally unique 64-char hex string identifying a particular
-  image, e.g. "3ce54e911389a2b08207b0a4d01c3131ce01b617ecc1c248f6d81ffdbebd628d".
-  Typically this is abbreviated in client usage to 12 chars: "3ce54e911389".
-- layers: I'm using "layer" and "image" interchangeably.  Images are built up
-  in layers.  Each image has a parent, until the base layer. This chain
-  forms the "history" (see `docker history <image>`), aka "ancestry"
-  (see <https://docs.docker.com/reference/api/registry_api/#get-image-ancestry>).
-  With Docker Registry API v2 these won't be interchangeable in the
-  registry implementation, but for compat with older Docker the separate ID
-  for each layer remains.
-
-Some relevant links:
-
-- <https://docs.docker.com/reference/api/hub_registry_spec/>
-- <https://docs.docker.com/reference/api/registry_api/>
-- <https://docs.docker.com/reference/api/docker-io_api/>
+Limitation: Currently on v1
+(<https://docs.docker.com/v1.6/reference/api/registry_api/>) of the Registry API
+is implemented. Support for v2 is planned.
 
 
-## Names
+## Overview
 
-Most usage of this package involves creating a Registry client and calling
-its methods. A Registry client requires a repository name:
+Most usage of this package involves creating a *Registry* API client for a
+specific *repository* and calling its methods.
+
+A Registry client requires a repository name (called a `repo` in the code):
 
     [INDEX/]NAME                # a "repo name"
 
@@ -71,6 +22,8 @@ Examples:
     docker.io/library/mongo     # same thing
 
     myreg.example.com:5000/busybox   # a "busybox" repo on a private registry
+
+    quay.io/trentm/foo          # trentm's "foo" repo on the quay.io service
 
 The `parseRepo` function is used to parse these. See "examples/parseRepo.js"
 to see how they are parsed:
@@ -109,7 +62,6 @@ registry, e.g. `docker pull busybox:latest`. This package provides
 Slightly different than docker.git's parsing, this package allows the
 scheme to be given on the index:
 
-
     $ node examples/parseRepoAndTag.js https://quay.io/trentm/foo
     {
         "index": {
@@ -124,13 +76,16 @@ scheme to be given on the index:
         "tag": "latest"                     // <--- default to 'latest' tag
     }
 
+If a scheme isn't given, then "https" is assumed.
+
 
 ## Registry client
 
 Typically:
 
+    var repo = 'alpine';
     var client = drc.createClient({
-        name: name,
+        name: repo,
         agent: false,              // optional
         log: log,                  // optional
         username: opts.username,   // optional
@@ -146,7 +101,17 @@ Typically:
     });
 
 
-See "examples/" for example usage of all (most?) of the API.
+See "examples/" for example usage of all of the API. E.g.:
+
+    $ node examples/listRepoTags.js alpine
+    {
+        "2.6": "6e25877bc8bcf3fc0baedee3cdcb2375c108840b999ac5d2319800602cc4dc28",
+        "2.7": "c22deeac7b1350109368da01902d83748a22e82847c1ba6e6d61f1869f6053c2",
+        "3.1": "878b6301bedafae11e013d8393be8bb3919d06e06917007991933b59c040c7fe",
+        "3.2": "31f630c65071968699d327be41add2e301d06568a4914e1aa67c98e1db34a9d8",
+        "edge": "5e704a9ae9acbaa969da7bec6eca7c9b8682b71e9edbe7aace95cdb880dd05a0",
+        "latest": "31f630c65071968699d327be41add2e301d06568a4914e1aa67c98e1db34a9d8"
+    }
 
 
 ## Dev Notes
