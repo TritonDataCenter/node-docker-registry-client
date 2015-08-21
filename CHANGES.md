@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 1.4.1 (not yet released)
+
+(nothing yet)
+
+
 ## 1.4.0
 
 - Test suites improvements to actually check against docker.io, quay.io, and
