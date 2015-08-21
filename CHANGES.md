@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 1.4.0 (not yet released)
+## 1.4.0
 
 - Test suites improvements to actually check against docker.io, quay.io, and
   optionally a jfrog artifactory Docker v1 repo.
