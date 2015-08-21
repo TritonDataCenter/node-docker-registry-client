@@ -2,7 +2,7 @@
 
 ## 1.4.1 (not yet released)
 
-(nothing yet)
+- DOCKER-549 Fix pulling from quay.io *private* repos.
 
 
 ## 1.4.0
