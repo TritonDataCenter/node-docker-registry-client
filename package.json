@@ -1,13 +1,13 @@
 {
     "name": "docker-registry-client",
-    "version": "1.4.2",
+    "version": "2.0.0",
     "description": "client for the Docker Registry API",
     "author": "Joyent (joyent.com)",
     "main": "./lib/index.js",
     "dependencies": {
         "assert-plus": "^0.1.5",
         "bunyan": "1.x >=1.3.3",
-        "restify": "git://github.com/joyent/node-restify.git#fd5d5b5",
+        "restify": "git+https://github.com/joyent/node-restify.git#fd5d5b5",
         "strsplit": "1.x",
         "tough-cookie": "2.0.x",
         "vasync": "1.x >=1.6.1",
@@ -29,5 +29,9 @@
         "index",
         "hub"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/joyent/node-docker-registry-client.git"
+    },
     "license": "MPL-2.0"
 }

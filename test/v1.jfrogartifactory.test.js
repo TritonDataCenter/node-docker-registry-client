@@ -59,7 +59,7 @@ try {
 
 if (CONFIG)
 test('v1 jfrog artifactory: ' + CONFIG.repo, function (tt) {
-    var client = drc.createClient({
+    var client = drc.createClientV1({
         name: CONFIG.repo,
         username: CONFIG.username,
         password: CONFIG.password,

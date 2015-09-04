@@ -1,9 +1,14 @@
 # node-docker-registry-client
 
 A Docker Registry API client for node.js.
-Limitation: Currently on v1
+Limitation: Currently only v1
 (<https://docs.docker.com/v1.6/reference/api/registry_api/>) of the Registry API
-is implemented. Support for v2 is planned.
+is implemented. Support for v2 is fledgling.
+
+
+## Install
+
+    npm install docker-registry-client
 
 
 ## Overview
@@ -79,20 +84,201 @@ scheme to be given on the index:
 If a scheme isn't given, then "https" is assumed.
 
 
-## Registry client
+## Usage
 
-Typically:
+Typically one creates a client as follows:
+
+
+    var drc = require('docker-registry-client');
 
     var repo = 'alpine';
+
     var client = drc.createClient({
         name: repo,
-        agent: false,              // optional
+        log: log,                   // optional, a Bunyan Logger
+        username: opts.username,    // optional
+        password: opts.password,    // optional
+        insecure: true|false,       // optional
+        // ... see the source code
+    });
+
+    // This will ping the registry to see if it supports v2. If so a v2 API
+    // client will be returned. Otherwise a v1 API client will be returned.
+    // See the API reference sections below for `client` methods.
+    //XXX Doc how to key off v1 or v2.
+
+    client.close(); // close open connection(s)
+
+
+## v2 API
+
+A mapping of the [Docker Registry API v2
+endpoints](https://docs.docker.com/registry/spec/api/#detail) to the API
+equivalents in this client lib. "NYI" means the endpoint is not yet implemented
+by this client lib.
+
+| Name                | Endpoint | Description |
+| ------------------- | -------- | ----------- |
+| ping                | `GET /v2/` | Check that the endpoint implements Docker Registry API V2. |
+| listTags            | `GET /v2/<name>/tags/list` | Fetch the tags under the repository identified by `name`. |
+| getManifest         | `GET /v2/<name>/manifests/<reference>` | Fetch the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| putManifest         | `PUT /v2/<name>/manifests/<reference>` | **NYI.** Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| deleteManifest      | `DELETE /v2/<name>/manifests/<reference>` | **NYI.** Delete the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| getBlob             | `GET /v2/<name>/blobs/<digest>` | **NYI.** Retrieve the blob from the registry identified by `digest`. |
+| headBlob            | `HEAD /v2/<name>/blobs/<digest>` | **NYI.** Retrieve the blob from the registry identified by `digest` -- just the headers. |
+| startBlobUpload     | `POST /v2/<name>/blobs/uploads/` | **NYI.** Initiate a resumable blob upload. If successful, an upload location will be provided to complete the upload. Optionally, if the `digest` parameter is present, the request body will be used to complete the upload in a single request. |
+| getBlobUploadStatus | `GET /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Retrieve status of upload identified by `uuid`. The primary purpose of this endpoint is to resolve the current status of a resumable upload. |
+| uploadBlobChunk     | `PATCH /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Upload a chunk of data for the specified upload. |
+| completeBlobUpload  | `PUT /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Complete the upload specified by `uuid`, optionally appending the body as the final chunk. |
+| cancelBlobUpload    | `DELETE /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout. |
+
+See ["examples/v2/*.js"](./examples/) for short code examples one can run from
+the CLI for each API endpoint. E.g.:
+
+    $ npm install   # install dependencies for this module
+    $ node examples/v2/listTags.js busybox
+    {
+        "name": "library/busybox",
+        "tags": [
+            "buildroot-2013.08.1",
+            "buildroot-2014.02",
+            "latest",
+            "ubuntu-12.04",
+            "ubuntu-14.04"
+        ]
+    }
+
+You can also get logging on processing and HTTP requests/responses via the
+`-v` option to the example scripts. This library uses
+[Bunyan](https://github.com/trentm/node-bunyan) for logging, so you'll
+want to pipe the log output (on stderr) through the `bunyan` command for
+pretty output:
+
+    $ node examples/v2/listTags.js -v busybox 2>&1 | ./node_modules/.bin/bunyan
+    [2015-06-01T22:26:44.065Z] TRACE: v2.listTags/registry/23400 on grape.local: request sent
+        GET /v2/ HTTP/1.1
+        Host: registry-1.docker.io
+        accept: application/json
+        user-agent: node-docker-registry-client/2.0.0 (x64-darwin; node/0.10.28)
+        date: Mon, 01 Jun 2015 22:26:44 GMT
+    [2015-06-01T22:26:44.480Z] TRACE: v2.listTags/registry/23400 on grape.local: Response received (client_res={})
+        HTTP/1.1 401 Unauthorized
+        content-type: application/json; charset=utf-8
+        docker-distribution-api-version: registry/2.0
+        www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+        date: Mon, 01 Jun 2015 22:26:44 GMT
+        content-length: 114
+        connection: close
+        strict-transport-security: max-age=3153600
+    [2015-06-01T22:26:44.482Z] TRACE: v2.listTags/registry/23400 on grape.local:
+        body received:
+        {"errors":[{"code":"UNAUTHORIZED","message":"access to the requested resource is not authorized","detail":null}]}
+    [2015-06-01T22:26:44.485Z] TRACE: v2.listTags/registry/23400 on grape.local: login
+    [2015-06-01T22:26:44.487Z] DEBUG: v2.listTags/registry/23400 on grape.local: login: get Bearer auth token
+    ...
+    [2015-06-01T22:26:45.680Z] TRACE: v2.listTags/registry/23400 on grape.local:
+        body received:
+        {"name":"library/busybox","tags":["buildroot-2013.08.1","buildroot-2014.02","latest","ubuntu-12.04","ubuntu-14.04"]}
+    {
+        "name": "library/busybox",
+        "tags": [
+            "buildroot-2013.08.1",
+            "buildroot-2014.02",
+            "latest",
+            "ubuntu-12.04",
+            "ubuntu-14.04"
+        ]
+    }
+
+V2 client code usage:
+
+    XXX
+
+
+## v1 API
+
+A mapping of the [Docker Registry API v1
+endpoints](https://docs.docker.com/v1.6/reference/api/registry_api/) to the API
+equivalents in this client lib.
+
+*Limitation:* Only the read endpoints of the v1 API are implement. I.e.
+putting layers, deleting repositories, setting/deleting tags are all not
+implemented.
+
+| Name              | Endpoint | Description |
+| ----------------- | -------- | ----------- |
+| ping              | `GET /v1/_ping` | Check status of the registry. |
+| search            | `GET /v1/search` | Search the index. |
+| listRepoImgs      | `GET /v1/repositories/$repo/images` | List all images in this repo. This is actually against the ["Index API"](https://docs.docker.com/v1.7/reference/api/docker-io_api/#list-user-repository-images) (aka "Hub API"). |
+| listRepoTags      | `GET /v1/repositories/$repo/tags` | List all tags for a repo. |
+| getImgAncestry    | `GET /v1/images/$imgId/ancestry` | Get the ancestry of an image. |
+| getImgJson        | `GET /v1/images/$imgId/json` | Get the metadata (sometimes called the "image JSON") for an image. |
+| getImgLayerStream | `GET /v1/images/$imgId/layer` | Download the image layer file. |
+| -                 | `PUT /v1/images/$imgId/layer` | *Not implemented.* Put image layer. |
+| -                 | `DELETE /v1/repositories/$repo/tags/$tag` | *Not implemented.* Delete a repo tag. |
+| -                 | `PUT /v1/repositories/$repo/tags/$tag` | *Not implemented.* Set a repo tag. |
+| -                 | `DELETE /v1/repositories/$repo` | *Not implemented.* Delete a repo. |
+
+
+See ["examples/v1/*.js"](./examples/) for short code examples one can run from
+the CLI for each API endpoint. E.g.:
+
+    $ npm install   # install dependencies for this module
+    $ node examples/v1/listRepoTags.js busybox
+    {
+        "buildroot-2013.08.1": "3dba22db9896eb5f020691e1f8cda46735de533ca7b6b1b3b072272752935bad",
+        "buildroot-2014.02": "8c2e06607696bd4afb3d03b687e361cc43cf8ec1a4a725bc96e39f05ba97dd55",
+        "latest": "8c2e06607696bd4afb3d03b687e361cc43cf8ec1a4a725bc96e39f05ba97dd55",
+        "ubuntu-12.04": "faf804f0e07b2936e84c9fe4ca7c60a6246cc669cf2ff70969f14a9eab6efb48",
+        "ubuntu-14.04": "32e97f5f5d6bd15b9cc293b38a5102a7ddac736852811110043992b20553177a"
+    }
+
+You can also get logging on processing and HTTP requests/responses via the
+`-v` option to the example scripts. This library uses
+[Bunyan](https://github.com/trentm/node-bunyan) for logging, so you'll
+want to pipe the log output (on stderr) through the `bunyan` command for
+pretty output:
+
+    $ node listRepoTags.js -v busybox 2>&1 | bunyan
+    [2015-09-02T22:14:35.790Z] TRACE: listRepoTags/registry/13388 on danger0.local: get session token/cookie
+    [2015-09-02T22:14:35.836Z] TRACE: listRepoTags/registry/13388 on danger0.local: request sent
+        GET /v1/repositories/library/busybox/images HTTP/1.1
+        Host: index.docker.io
+        X-Docker-Token: true
+        accept: application/json
+        user-agent: node-docker-registry-client/2.0.0 (x64-darwin; node/0.10.40)
+        date: Wed, 02 Sep 2015 22:14:35 GMT
+    [2015-09-02T22:14:36.374Z] TRACE: listRepoTags/registry/13388 on danger0.local: Response received (client_res={})
+        HTTP/1.1 200 OK
+        server: nginx/1.6.2
+        date: Wed, 02 Sep 2015 22:14:36 GMT
+    ...
+    [2015-09-02T22:14:37.888Z] TRACE: listRepoTags/registry/13388 on danger0.local:
+        body received:
+        {"buildroot-2013.08.1": "3dba22db9...
+    [2015-09-02T22:14:37.888Z] TRACE: listRepoTags/registry/13388 on danger0.local: close http client (host=index.docker.io)
+    [2015-09-02T22:14:37.889Z] TRACE: listRepoTags/registry/13388 on danger0.local: close http client (host=registry-1.docker.io)
+    {
+        "buildroot-2013.08.1": "3dba22db9896eb5f020691e1f8cda46735de533ca7b6b1b3b072272752935bad",
+        "buildroot-2014.02": "8c2e06607696bd4afb3d03b687e361cc43cf8ec1a4a725bc96e39f05ba97dd55",
+        "latest": "8c2e06607696bd4afb3d03b687e361cc43cf8ec1a4a725bc96e39f05ba97dd55",
+        "ubuntu-12.04": "faf804f0e07b2936e84c9fe4ca7c60a6246cc669cf2ff70969f14a9eab6efb48",
+        "ubuntu-14.04": "32e97f5f5d6bd15b9cc293b38a5102a7ddac736852811110043992b20553177a"
+    }
+
+
+V1 client usage:
+
+    var repo = 'alpine';
+    var client = drc.createClientV1({
+        name: repo,
         log: log,                  // optional
         username: opts.username,   // optional
         password: opts.password,   // optional
         // ... see the source code
     });
     client.listRepoTags(function (err, repoTags) {
+        client.close();
         if (err) {
             console.log(err);
             process.exit(1);
@@ -101,17 +287,6 @@ Typically:
     });
 
 
-See "examples/" for example usage of all of the API. E.g.:
-
-    $ node examples/listRepoTags.js alpine
-    {
-        "2.6": "6e25877bc8bcf3fc0baedee3cdcb2375c108840b999ac5d2319800602cc4dc28",
-        "2.7": "c22deeac7b1350109368da01902d83748a22e82847c1ba6e6d61f1869f6053c2",
-        "3.1": "878b6301bedafae11e013d8393be8bb3919d06e06917007991933b59c040c7fe",
-        "3.2": "31f630c65071968699d327be41add2e301d06568a4914e1aa67c98e1db34a9d8",
-        "edge": "5e704a9ae9acbaa969da7bec6eca7c9b8682b71e9edbe7aace95cdb880dd05a0",
-        "latest": "31f630c65071968699d327be41add2e301d06568a4914e1aa67c98e1db34a9d8"
-    }
 
 
 ## Dev Notes

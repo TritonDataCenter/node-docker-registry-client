@@ -21,7 +21,7 @@ var log = require('./lib/log');
 // --- Tests
 
 test('v1 quay.io', function (tt) {
-    var client = drc.createClient({
+    var client = drc.createClientV1({
         name: 'quay.io/quay/elasticsearch',
         log: log
     });

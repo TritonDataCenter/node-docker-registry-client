@@ -36,7 +36,7 @@ var format = require('util').format;
 var read = require('read');
 var vasync = require('vasync');
 
-var drc = require('../');
+var drc = require('../../');
 
 
 
@@ -67,7 +67,7 @@ var log = bunyan.createLogger({
 
 var indexName = process.argv[2] || 'docker.io';
 if (!indexName) {
-    console.error('usage: node examples/%s.js [INDEX]', cmd);
+    console.error('usage: node examples/v1/%s.js [INDEX]', cmd);
     process.exit(2);
 }
 
@@ -105,7 +105,7 @@ vasync.pipeline({funcs: [
         });
     },
     function doLogin(_, next) {
-        drc.login({
+        drc.loginV1({
             indexName: indexName,
             log: log,
             // TODO: insecure: insecure,

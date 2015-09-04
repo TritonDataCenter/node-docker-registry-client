@@ -10,16 +10,16 @@
  * Copyright (c) 2015, Joyent, Inc.
  */
 
-var drc = require('../');
-var mainline = require('./mainline');
+var drc = require('../../');
+var mainline = require('../mainline');
 
 // Shared mainline with examples/foo.js to get CLI opts.
 var cmd = 'getImgAncestry';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     if (!args[0] || (args[0].indexOf(':') === -1 && !args[1])) {
         console.error('usage:\n' +
-            '    node examples/%s.js REPO:TAG\n' +
-            '    node examples/%s.js REPO IMAGE-ID\n' +
+            '    node examples/v1/%s.js REPO:TAG\n' +
+            '    node examples/v1/%s.js REPO IMAGE-ID\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, cmd, parser.help().trimRight());
@@ -32,7 +32,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     if (args[0].indexOf(':') !== -1) {
         // Lookup by REPO:TAG.
         var rat = drc.parseRepoAndTag(args[0]);
-        client = drc.createClient({
+        client = drc.createClientV1({
             scheme: rat.index.scheme,
             name: rat.canonicalName,
             log: log,
@@ -55,7 +55,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
     } else {
         // Lookup by REPO & IMAGE-ID.
-        client = drc.createClient({
+        client = drc.createClientV1({
             name: args[0],
             log: log,
             username: opts.username,

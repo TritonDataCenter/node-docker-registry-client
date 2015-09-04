@@ -10,39 +10,36 @@
  * Copyright (c) 2015, Joyent, Inc.
  */
 
-var drc = require('../');
-var mainline = require('./mainline');
+var drc = require('../../');
+var mainline = require('../mainline');
 
 // Shared mainline with examples/foo.js to get CLI opts.
-var cmd = 'getImgId';
+var cmd = 'listRepoImgs';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
-    var repoAndTag = args[0];
-    if (!repoAndTag) {
-        console.error('usage: node examples/%s.js REPO:TAG\n' +
+    var name = args[0];
+    if (!name) {
+        console.error('usage: node examples/v1/%s.js REPO\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());
         process.exit(2);
     }
 
-    // The interesting stuff starts here.
-    var rat = drc.parseRepoAndTag(repoAndTag);
-    console.error('# repo: %s', rat.canonicalName);
-    console.error('# tag:  %s', rat.tag);
 
-    var client = drc.createClient({
-        scheme: rat.index.scheme,
-        name: rat.canonicalName,
+    // The interesting stuff starts here.
+    var client = drc.createClientV1({
+        name: name,
         log: log,
         insecure: opts.insecure,
         username: opts.username,
         password: opts.password
     });
-    client.getImgId({tag: rat.tag}, function (err, imgId) {
+    client.listRepoImgs(function (err, imgs) {
         client.close();
         if (err) {
             mainline.fail(cmd, err);
         }
-        console.log(imgId);
+        console.log(JSON.stringify(imgs, null, 4));
     });
+
 });
