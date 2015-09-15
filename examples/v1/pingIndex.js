@@ -32,7 +32,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
         log: log
     }, function (err, status, res) {
         if (err) {
-            mainline.fail(cmd, err);
+            mainline.fail(cmd, err, opts);
         }
         console.log('status: %j', status);
         console.log('HTTP status: %s', res.statusCode);

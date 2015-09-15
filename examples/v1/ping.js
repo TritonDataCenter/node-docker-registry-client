@@ -34,7 +34,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     reg.ping(function (err, status, res) {
         reg.close();
         if (err) {
-            mainline.fail(cmd, err);
+            mainline.fail(cmd, err, opts);
         }
         console.log('status: %j', status);
         console.log('HTTP status: %s', res.statusCode);

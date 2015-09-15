@@ -55,7 +55,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     client.search({term: term}, function (err, results, res) {
         client.close();
         if (err) {
-            mainline.fail(cmd, err);
+            mainline.fail(cmd, err, opts);
         }
         console.log(JSON.stringify(results, null, 4));
     });

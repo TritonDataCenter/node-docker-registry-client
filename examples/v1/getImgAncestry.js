@@ -42,12 +42,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         });
         client.getImgId({tag: rat.tag}, function (err, imgId) {
             if (err) {
-                mainline.fail(cmd, err);
+                mainline.fail(cmd, err, opts);
             }
             client.getImgAncestry({imgId: imgId}, function (aErr, ancestry) {
                 client.close();
                 if (aErr) {
-                    mainline.fail(cmd, aErr);
+                    mainline.fail(cmd, aErr, opts);
                 }
                 console.log(JSON.stringify(ancestry, null, 4));
             });
@@ -64,7 +64,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         client.getImgAncestry({imgId: args[1]}, function (aErr, ancestry) {
             client.close();
             if (aErr) {
-                mainline.fail(cmd, aErr);
+                mainline.fail(cmd, aErr, opts);
             }
             console.log(JSON.stringify(ancestry, null, 4));
         });

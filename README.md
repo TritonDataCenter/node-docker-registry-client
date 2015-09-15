@@ -131,6 +131,7 @@ by this client lib.
 | uploadBlobChunk     | `PATCH /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Upload a chunk of data for the specified upload. |
 | completeBlobUpload  | `PUT /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Complete the upload specified by `uuid`, optionally appending the body as the final chunk. |
 | cancelBlobUpload    | `DELETE /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout. |
+| listRepositories    | `GET /v2/_catalog/` | **NYI** List all repositories in this registry. [Spec.](https://docs.docker.com/registry/spec/api/#listing-repositories) |
 
 See ["examples/v2/*.js"](./examples/) for short code examples one can run from
 the CLI for each API endpoint. E.g.:

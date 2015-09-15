@@ -37,7 +37,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     client.listRepoImgs(function (err, imgs) {
         client.close();
         if (err) {
-            mainline.fail(cmd, err);
+            mainline.fail(cmd, err, opts);
         }
         console.log(JSON.stringify(imgs, null, 4));
     });

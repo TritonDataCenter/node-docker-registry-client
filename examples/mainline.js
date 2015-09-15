@@ -56,8 +56,12 @@ var optionsNoAuth = [
 ];
 
 
-function fail(cmd, err) {
-    console.error('%s: error: %s', cmd, err.message || err);
+function fail(cmd, err, opts) {
+    assert.optionalObject(opts, 'opts');
+    opts = opts || {};
+
+    var errToShow = opts.verbose ? err.stack || err : err.message || err;
+    console.error('%s: error: %s', cmd, errToShow);
     process.exit(2);
 }
 

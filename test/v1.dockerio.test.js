@@ -21,12 +21,19 @@ var log = require('./lib/log');
 // --- Tests
 
 test('v1 docker.io', function (tt) {
-    var client = drc.createClientV1({
-        name: 'alpine',
-        log: log
+    var client;
+
+    tt.test('  createClient', function (t) {
+        client = drc.createClientV1({
+            name: 'alpine',
+            log: log
+        });
+        t.ok(client);
+        t.equal(client.version, 1);
+        t.end();
     });
 
-    tt.test(' ping', function (t) {
+    tt.test('  ping', function (t) {
         client.ping(function (err, status, res) {
             t.ifErr(err);
             t.equal(status, true);
@@ -34,7 +41,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' search', function (t) {
+    tt.test('  search', function (t) {
         client.search({term: 'busy'}, function (err, results, res) {
             t.ifErr(err);
             t.ok(results)
@@ -48,7 +55,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' listRepoImgs', function (t) {
+    tt.test('  listRepoImgs', function (t) {
         client.listRepoImgs(function (err, imgs) {
             t.ifErr(err);
             t.ok(Array.isArray(imgs));
@@ -61,7 +68,7 @@ test('v1 docker.io', function (tt) {
     var tag = 'latest';
     var repoTags;
 
-    tt.test(' listRepoTags', function (t) {
+    tt.test('  listRepoTags', function (t) {
         client.listRepoTags(function (err, repoTags_) {
             repoTags = repoTags_;
             t.ifErr(err);
@@ -72,7 +79,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' getImgId', function (t) {
+    tt.test('  getImgId', function (t) {
         client.getImgId({tag: tag}, function (err, imgId) {
             t.ifErr(err);
             t.ok(imgId);
@@ -82,7 +89,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' getImgAncestry', function (t) {
+    tt.test('  getImgAncestry', function (t) {
         client.getImgAncestry({imgId: repoTags[tag]}, function (err, ancestry) {
             t.ifErr(err);
             t.ok(Array.isArray(ancestry));
@@ -92,7 +99,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' getImgJson', function (t) {
+    tt.test('  getImgJson', function (t) {
         var imgId = repoTags[tag];
         client.getImgJson({imgId: imgId}, function (err, imgJson, res) {
             t.ifErr(err);
@@ -102,7 +109,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test(' getImgLayerStream', function (t) {
+    tt.test('  getImgLayerStream', function (t) {
         var imgId = repoTags[tag];
         client.getImgLayerStream({imgId: imgId}, function (err, stream) {
             t.ifErr(err, 'no error');
@@ -128,9 +135,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-
-
-    tt.test(' close', function (t) {
+    tt.test('  close', function (t) {
         client.close();
         t.end();
     });

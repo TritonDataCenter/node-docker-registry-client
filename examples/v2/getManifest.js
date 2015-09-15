@@ -14,11 +14,11 @@ var drc = require('../../');
 var mainline = require('../mainline');
 
 // Shared mainline with examples/foo.js to get CLI opts.
-var cmd = 'listRepoTags';
+var cmd = 'getManifest';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
     var name = args[0];
     if (!name) {
-        console.error('usage: node examples/v1/%s.js REPO\n' +
+        console.error('usage: node examples/v2/%s.js REPO[:TAG|@DIGEST]\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());
@@ -27,19 +27,24 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
 
     // The interesting stuff starts here.
-    var client = drc.createClientV1({
-        name: name,
+    var rat = drc.parseRepoAndTag(name);
+    drc.createClient({
+        name: rat.localName,
+        agent: false,
         log: log,
-        insecure: opts.insecure,
         username: opts.username,
         password: opts.password
-    });
-    client.listRepoTags(function (err, repoTags) {
-        client.close();
-        if (err) {
-            mainline.fail(cmd, err, opts);
+    }, function (clientErr, client) {
+        if (clientErr) {
+            mainline.fail(cmd, clientErr, opts);
         }
-        console.log(JSON.stringify(repoTags, null, 4));
+        client.getManifest({ref: rat.tag || rat.digest},
+                function (err, manifest) {
+            client.close();
+            if (err) {
+                mainline.fail(cmd, err, opts);
+            }
+            console.log(JSON.stringify(manifest, null, 4));
+        });
     });
-
 });

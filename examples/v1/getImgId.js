@@ -41,7 +41,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     client.getImgId({tag: rat.tag}, function (err, imgId) {
         client.close();
         if (err) {
-            mainline.fail(cmd, err);
+            mainline.fail(cmd, err, opts);
         }
         console.log(imgId);
     });
