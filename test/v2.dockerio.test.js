@@ -76,10 +76,12 @@ test('v2 docker.io', function (tt) {
      *  }
      */
     var manifest;
+    var manifestDigest;
     tt.test('  getManifest', function (t) {
-        client.getManifest({ref: 'latest'}, function (err, manifest_) {
+        client.getManifest({ref: 'latest'}, function (err, manifest_, res) {
             t.ifErr(err);
             manifest = manifest_;
+            manifestDigest = res.headers['docker-content-digest'];
             t.ok(manifest);
             t.equal(manifest.schemaVersion, 1);
             t.equal(manifest.name, 'library/busybox');
@@ -88,6 +90,20 @@ test('v2 docker.io', function (tt) {
             t.ok(manifest.fsLayers);
             t.ok(manifest.history[0].v1Compatibility);
             t.ok(manifest.signatures[0].signature);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (by digest)', function (t) {
+        client.getManifest({ref: manifestDigest}, function (err, manifest_) {
+            t.ifErr(err);
+            t.ok(manifest);
+            ['schemaVersion',
+             'name',
+             'tag',
+             'architecture'].forEach(function (k) {
+                t.equal(manifest_[k], manifest[k], k);
+            });
             t.end();
         });
     });

@@ -36,11 +36,14 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         password: opts.password
     });
     client.getManifest({ref: rat.tag || rat.digest},
-            function (err, manifest) {
+            function (err, manifest, res) {
         client.close();
         if (err) {
             mainline.fail(cmd, err, opts);
         }
+        console.log("# response headers");
+        console.log(JSON.stringify(res.headers, null, 4));
+        console.log("# manifest");
         console.log(JSON.stringify(manifest, null, 4));
     });
 });
