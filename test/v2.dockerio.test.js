@@ -101,24 +101,41 @@ test('v2 docker.io', function (tt) {
         });
     });
 
-    //
-    //tt.test('headBlob', function (t) {
-    //    var tarsum = manifest.fsLayers[0].blobSum;
-    //    client.headBlob({digest: tarsum}, function (err, res, firstRes) {
-    //        t.ifErr(err);
-    //        t.ok(firstRes);
-    //        t.ok(firstRes.statusCode === 200 || firstRes.statusCode === 307);
-    //        t.equal(firstRes.headers['docker-content-digest'], tarsum);
-    //        t.equal(firstRes.headers['docker-distribution-api-version'],
-    //            'registry/2.0');
-    //        t.ok(res);
-    //        t.ok(res.statusCode === 200);
-    //        t.equal(res.headers['content-type'], 'application/octet-stream');
-    //        t.ok(res.headers['content-length']);
-    //        t.end();
-    //    });
-    //});
-    //
+    tt.test('  headBlob', function (t) {
+        var digest = manifest.fsLayers[0].blobSum;
+        client.headBlob({digest: digest}, function (err, ress) {
+            t.ifErr(err);
+            t.ok(ress);
+            t.ok(Array.isArray(ress));
+            var first = ress[0];
+            t.ok(first.statusCode === 200 || first.statusCode === 307);
+            t.equal(first.headers['docker-content-digest'], digest);
+            t.equal(first.headers['docker-distribution-api-version'],
+                'registry/2.0');
+            var last = ress[ress.length - 1];
+            t.ok(last);
+            t.equal(last.statusCode, 200);
+            t.equal(last.headers['content-type'], 'application/octet-stream');
+            t.ok(last.headers['content-length']);
+            t.end();
+        });
+    });
+
+    tt.test('  headBlob (unknown digest)', function (t) {
+        var digest = manifest.fsLayers[0].blobSum;
+        client.headBlob({digest: 'cafebabe'}, function (err, ress) {
+            t.ok(err);
+            t.ok(ress);
+            t.ok(Array.isArray(ress));
+            t.equal(ress.length, 1);
+            var res = ress[0];
+            t.equal(res.statusCode, 404);
+            t.equal(res.headers['docker-distribution-api-version'],
+                'registry/2.0');
+            t.end();
+        });
+    });
+
     //tt.test('getBlob', function (t) {
     //    var tarsum = manifest.fsLayers[0].blobSum;
     //    client.getBlob({digest: tarsum}, function (err, res, firstRes) {
