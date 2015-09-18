@@ -124,8 +124,8 @@ by this client lib.
 | getManifest         | `GET /v2/<name>/manifests/<reference>` | Fetch the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
 | putManifest         | `PUT /v2/<name>/manifests/<reference>` | **NYI.** Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
 | deleteManifest      | `DELETE /v2/<name>/manifests/<reference>` | **NYI.** Delete the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
-| getBlob             | `GET /v2/<name>/blobs/<digest>` | **NYI.** Retrieve the blob from the registry identified by `digest`. |
-| headBlob            | `HEAD /v2/<name>/blobs/<digest>` | **NYI.** Retrieve the blob from the registry identified by `digest` -- just the headers. |
+| createBlobReadStream | `GET /v2/<name>/blobs/<digest>` | Retrieve the blob from the registry identified by `digest`. |
+| headBlob            | `HEAD /v2/<name>/blobs/<digest>` | Retrieve the blob from the registry identified by `digest` -- just the headers. |
 | startBlobUpload     | `POST /v2/<name>/blobs/uploads/` | **NYI.** Initiate a resumable blob upload. If successful, an upload location will be provided to complete the upload. Optionally, if the `digest` parameter is present, the request body will be used to complete the upload in a single request. |
 | getBlobUploadStatus | `GET /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Retrieve status of upload identified by `uuid`. The primary purpose of this endpoint is to resolve the current status of a resumable upload. |
 | uploadBlobChunk     | `PATCH /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Upload a chunk of data for the specified upload. |

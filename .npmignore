@@ -8,3 +8,4 @@
 /deps
 /docker-registry-client-*.tgz
 *.layer
+*.blob
