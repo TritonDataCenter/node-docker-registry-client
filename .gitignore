@@ -3,4 +3,5 @@
 /docker-registry-client-*.tgz
 *.layer
 *.blob
+/examples/v2/*.manifest
 /test/config.json
