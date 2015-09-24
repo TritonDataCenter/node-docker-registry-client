@@ -1,8 +1,10 @@
 # node-docker-registry-client Changelog
 
-## 1.4.2 (not yet released)
+## 2.0.0 (not yet released)
 
-(nothing yet)
+- Fix reliability issues with v2 download of large layer files.
+  My understanding is that this was due to <https://github.com/nodejs/node/issues/3055>.
+  This module is now avoiding `agent: false`, at least for the blob downloads.
 
 
 ## 1.4.1
@@ -39,7 +41,7 @@
             //...
         });
 
-  On side-effect of this change is the underlying HTTP connections no longer
+  One side-effect of this change is the underlying HTTP connections no longer
   set `agent: false` to avoid Node's default HTTP agent. This means that if you
   are **not** using a proxy, you will now get keep-alive, which means a
   persistent connection that could hold your node script/app from exiting. All
