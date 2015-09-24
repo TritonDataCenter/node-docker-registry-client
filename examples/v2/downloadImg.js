@@ -110,7 +110,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                             filename: format('%s %d layers',
                                 rat.localName, manifest.fsLayers.length),
                             size: cLens.reduce(function (a, b) { return a+b; })
-                        })
+                        });
                         bar.advance(numBytes); // starter value
                     }, 2000);
                 }
