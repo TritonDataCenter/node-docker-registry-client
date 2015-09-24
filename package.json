@@ -20,6 +20,8 @@
     "devDependencies": {
         "dashdash": "1.x",
         "read": "1.x",
+        "once": "1.x",
+        "progbar": "1.x",
         "tape": "4.x"
     },
     "engines": {

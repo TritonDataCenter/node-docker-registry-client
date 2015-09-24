@@ -10,13 +10,23 @@
  * Copyright (c) 2015, Joyent, Inc.
  */
 
+/*
+ * Download a complete Docker image over the v2 API. This will download
+ * the manifest and all layers to files in the current directory.
+ */
+
 var assert = require('assert-plus');
 var format = require('util').format;
 var fs = require('fs');
+var once = require('once');
+var progbar = require('progbar');
 var vasync = require('vasync');
 
 var drc = require('../../');
 var mainline = require('../mainline');
+
+
+var PROGRESS = true;
 
 
 // Shared mainline with examples/foo.js to get CLI opts.
@@ -35,7 +45,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     // The interesting stuff starts here.
     var rat = drc.parseRepoAndTag(args[0]);
     console.log('Repo:', rat.canonicalName);
-    client = drc.createClientV2({
+    var client = drc.createClientV2({
         scheme: rat.index.scheme,
         name: rat.canonicalName,
         log: log,
@@ -44,7 +54,14 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         password: opts.password
     });
 
-    var digest = rat.digest;
+    // Lazy progress bar. If we have a bar, then need to `bar.log(...)` messages
+    // to the user.
+    var bar;
+    var barTimeout;
+    function msg() {
+        (bar ? bar.log.bind(bar) : console.log)(format.apply(null, arguments));
+    }
+
     var manifest;
     var slug = rat.localName.replace(/[^\w]+/, '-') + '-' +
         (rat.tag ? rat.tag : rat.digest.slice(0, 12));
@@ -65,7 +82,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                 if (err) {
                     return next(err);
                 }
-                console.log('Wrote manifest:', filename);
+                msg('Wrote manifest:', filename);
                 next();
             });
         },
@@ -74,19 +91,46 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
             for (var i = 0; i < manifest.fsLayers.length; i++) {
                 manifest.fsLayers[i].i = i + 1;
             }
+
+            /*
+             * Before setting up a progress bar, we'll wait for the
+             * content-length of all layers. Then we'll only bother with the
+             * progress bar if the download is taking greater than a few
+             * seconds.
+             */
+            var cLens = [];
+            var numBytes = 0;
+            function cLenForBar(n) {
+                cLens.push(n);
+                if (PROGRESS && process.stderr.isTTY &&
+                    cLens.length === manifest.fsLayers.length)
+                {
+                    barTimeout = setTimeout(function () {
+                        bar = new progbar.ProgressBar({
+                            filename: format('%s %d layers',
+                                rat.localName, manifest.fsLayers.length),
+                            size: cLens.reduce(function (a, b) { return a+b; })
+                        })
+                        bar.advance(numBytes); // starter value
+                    }, 2000);
+                }
+            }
+
             vasync.forEachParallel({
                 inputs: manifest.fsLayers,
-                func: function downloadOneLayer(layer, nextLayer) {
+                func: function downloadOneLayer(layer, nextLayer_) {
+                    var nextLayer = once(nextLayer_);
                     client.createBlobReadStream({digest: layer.blobSum},
-                            function (err, stream, ress) {
-                        if (err) {
-                            return nextLayer(err);
+                            function (createErr, stream, ress) {
+                        if (createErr) {
+                            return nextLayer(createErr);
                         }
+                        cLenForBar(Number(stream.headers['content-length']));
                         var filename = format('%s-%d-%s.layer', slug, layer.i,
                             layer.blobSum.split(':')[1].slice(0, 12));
                         var fout = fs.createWriteStream(filename);
                         fout.on('finish', function () {
-                            console.log('Downloaded layer %d of %d: %s',
+                            msg('Downloaded layer %d of %d: %s',
                                 layer.i, manifest.fsLayers.length, filename);
                             nextLayer();
                         });
@@ -96,12 +140,31 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                         fout.on('error', function (err) {
                             nextLayer(err);
                         });
+                        stream.on('data', function (chunk) {
+                            numBytes += chunk.length;
+                            if (bar) {
+                                bar.advance(chunk.length);
+                            }
+                        });
                         stream.pipe(fout);
                         stream.resume();
                     });
                 }
             }, next);
+        },
+
+        function endProgbar(_, next) {
+            if (barTimeout) {
+                clearTimeout(barTimeout);
+                barTimeout = null;
+            }
+            if (bar) {
+                bar.end();
+                bar = null;
+            }
+            next();
         }
+
     ]}, function (err) {
         client.close();
         if (err) {
@@ -109,85 +172,4 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         }
     });
 
-if (false) {
-    var client, imgId;
-    if (args[0].indexOf(':') !== -1) {
-        // Lookup by REPO:TAG.
-        var rat = drc.parseRepoAndTag(args[0]);
-        console.log('Repo:', rat.canonicalName);
-        client = drc.createClientV1({
-            scheme: rat.index.scheme,
-            name: rat.canonicalName,
-            log: log,
-            insecure: opts.insecure,
-            username: opts.username,
-            password: opts.password
-        });
-        client.getImgId({tag: rat.tag}, function (err, imgId_) {
-            if (err) {
-                mainline.fail(cmd, err, opts);
-            }
-            imgId = imgId_;
-            console.log('imgId:', imgId);
-            client.getImgLayerStream({imgId: imgId}, saveStreamToFile);
-        });
-    } else {
-        // Lookup by REPO & IMAGE-ID.
-        console.log('Repo:', args[0]);
-        client = drc.createClientV1({
-            name: args[0],
-            log: log,
-            insecure: opts.insecure,
-            username: opts.username,
-            password: opts.password
-        });
-        imgId = args[1];
-        console.log('imgId:', imgId);
-        client.getImgLayerStream({imgId: imgId}, saveStreamToFile);
-    }
-
-    function saveStreamToFile(getErr, stream) {
-        if (getErr) {
-            mainline.fail(cmd, getErr);
-        }
-
-        var shortId = imgId.slice(0, 12);
-        console.log('Downloading img %s layer to "./%s.layer".',
-            shortId, shortId);
-        console.log('Response headers:');
-        console.log(JSON.stringify(stream.headers, null, 4));
-
-        var fout = fs.createWriteStream(shortId + '.layer');
-        fout.on('finish', function () {
-            client.close();
-            console.log('Done downloading image layer.');
-            var len = Number(stream.headers['content-length']);
-            if (len !== NaN) {
-                if (len !== numBytes) {
-                    mainline.fail(cmd, format('Unexpected download size: ' +
-                        'downloaded %d bytes, Content-Length header was %d.',
-                        numBytes, len));
-                } else {
-                    console.log('Downloaded %s bytes (matching ' +
-                        'Content-Length header).', numBytes);
-                }
-            }
-        });
-
-        var numBytes = 0;
-        stream.on('data', function (chunk) {
-            numBytes += chunk.length;
-        });
-
-        stream.on('error', function (err) {
-            mainline.fail(cmd, 'error downloading: ' + err);
-        });
-        fout.on('error', function (err) {
-            mainline.fail(cmd, 'error writing: ' + err);
-        });
-
-        stream.pipe(fout);
-        stream.resume();
-    }
-}
 });
