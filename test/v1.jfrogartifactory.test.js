@@ -51,7 +51,8 @@ try {
     CONFIG = null;
     log.warn(e, 'skipping jfrog artifactory tests: ' +
         'could not load "jfrogartifactory" key from test/config.json')
-    console.warn("# skipping jfrog artifactory tests: %s", e.message);
+    console.warn("# warning: skipping jfrog artifactory tests: %s",
+        e.message);
 }
 
 
