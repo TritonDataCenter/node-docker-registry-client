@@ -30,8 +30,8 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     var rat = drc.parseRepoAndRef(name);
     var client = drc.createClientV2({
         name: rat.localName,
-        agent: false,
         log: log,
+        insecure: opts.insecure,
         username: opts.username,
         password: opts.password
     });
