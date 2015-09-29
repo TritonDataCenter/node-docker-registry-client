@@ -2,6 +2,10 @@
 
 ## 2.0.0 (not yet released)
 
+- A start at Docker Registry API v2 support. For now just *pull* support (the
+  subset of the API needed for `docker pull`). Support for the rest of the API
+  is coming.  See the updated README and "examples/v2/".
+
 - Fix reliability issues with v2 download of large layer files.
   My understanding is that this was due to <https://github.com/nodejs/node/issues/3055>.
   This module is now avoiding `agent: false`, at least for the blob downloads.

@@ -1,9 +1,11 @@
 # node-docker-registry-client
 
 A Docker Registry API client for node.js.
-Limitation: Currently only v1
-(<https://docs.docker.com/v1.6/reference/api/registry_api/>) of the Registry API
-is implemented. Support for v2 is fledgling.
+
+Limitations: Currently only support for Registry API v1
+(<https://docs.docker.com/v1.6/reference/api/registry_api/>) *pull* support
+(i.e. excluding API endpoints for push) and Registry API v2 *pull* support.
+Support for v2 push endpoints is coming.
 
 
 ## Install
@@ -47,10 +49,13 @@ to see how they are parsed:
 
 
 Commonly, a "repo name and tag" string is used for working with a Docker
-registry, e.g. `docker pull busybox:latest`. This package provides
-`parseRepoAndTag` for that, e.g.:
+registry, e.g. `docker pull busybox:latest`. The v2 API adds support for using
+"repo name and digest" to stably identify images, e.g. `docker pull
+alpine@sha256:fb9f16730ac6316afa4d97caa5130219927bfcecf0b0ce35c01dcb612f449739`.
+This package provides a `parseRepoAndRef` (and the synonym `parseRepoAndTag`)
+for that, e.g.:
 
-    $ node examples/parseRepoAndTag.js myreg.example.com:5000/busybox:foo
+    $ node examples/parseRepoAndRef.js myreg.example.com:5000/busybox:foo
     {
         "index": {
             "name": "myreg.example.com:5000",
@@ -67,7 +72,7 @@ registry, e.g. `docker pull busybox:latest`. This package provides
 Slightly different than docker.git's parsing, this package allows the
 scheme to be given on the index:
 
-    $ node examples/parseRepoAndTag.js https://quay.io/trentm/foo
+    $ node examples/parseRepoAndRef.js https://quay.io/trentm/foo
     {
         "index": {
             "scheme": "https",              // <--- scheme
@@ -86,28 +91,62 @@ If a scheme isn't given, then "https" is assumed.
 
 ## Usage
 
-Typically one creates a client as follows:
+If you know, for example, that you are only dealing with a v2 Docker Registry,
+then simple usage will look like this:
 
+    var drc = require('docker-registry-client');
+    var REPO = 'alpine';
+    var client = drc.createClientV2({name: REPO});
+
+    client.listTags(function (err, tags) {
+        // ...
+        console.log(JSON.stringify(tags, null, 4));
+
+        /*
+         * Because the client is typically using Keep-Alive, it will maintain
+         * open connections. Therefore you should call `.close()` to close
+         * those when finished.
+         */
+        client.close();
+    });
+
+A more complete example (showing logging, auth, etc.):
+
+    var bunyan = require('bunyan');
+    var drc = require('docker-registry-client');
+
+    // This package uses https://github.com/trentm/node-bunyan for logging.
+    var log = bunyan.createLogger({
+        name: 'regplay',
+        // TRACE-level logging will show you all request/response activity
+        // with the registry. This isn't suggested for production usage.
+        level: 'trace'
+    });
+
+    var REPO = 'alpine';
+    var client = drc.createClientV2({
+        name: REPO,
+        log: log,
+        // Optional basic auth to the registry
+        username: <username>,
+        password: <password>,
+        // Optional, for a registry without a signed TLS certificate.
+        insecure: <true|false>,
+        // ... see the source code for other options
+    });
+
+
+This package also supports the nominal technique for pinging the registry
+to see if it supports v2, otherwise falling back to v1:
 
     var drc = require('docker-registry-client');
 
-    var repo = 'alpine';
-
-    var client = drc.createClient({
-        name: repo,
-        log: log,                   // optional, a Bunyan Logger
-        username: opts.username,    // optional
-        password: opts.password,    // optional
-        insecure: true|false,       // optional
-        // ... see the source code
+    var REPO = 'alpine';
+    drc.createClient({name: REPO, /* ... */}, function (err, client) {
+        console.log('Got a Docker Registry API v%d client', client.version);
+        // ...
     });
 
-    // This will ping the registry to see if it supports v2. If so a v2 API
-    // client will be returned. Otherwise a v1 API client will be returned.
-    // See the API reference sections below for `client` methods.
-    //XXX Doc how to key off v1 or v2.
-
-    client.close(); // close open connection(s)
 
 
 ## v2 API
@@ -191,10 +230,6 @@ pretty output:
         ]
     }
 
-V2 client code usage:
-
-    XXX
-
 
 ## v1 API
 
@@ -273,10 +308,7 @@ V1 client usage:
     var repo = 'alpine';
     var client = drc.createClientV1({
         name: repo,
-        log: log,                  // optional
-        username: opts.username,   // optional
-        password: opts.password,   // optional
-        // ... see the source code
+        // ...
     });
     client.listRepoTags(function (err, repoTags) {
         client.close();
@@ -286,8 +318,6 @@ V1 client usage:
         }
         console.log(JSON.stringify(repoTags, null, 4));
     });
-
-
 
 
 ## Dev Notes

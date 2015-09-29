@@ -29,7 +29,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     }
 
     // The interesting stuff starts here.
-    var rat = drc.parseRepoAndTag(args[0]);
+    var rat = drc.parseRepoAndRef(args[0]);
     assert.ok(rat.digest, 'must specify a @DIGEST');
     console.log('Repo:', rat.canonicalName);
 

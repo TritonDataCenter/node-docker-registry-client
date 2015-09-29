@@ -43,7 +43,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     }
 
     // The interesting stuff starts here.
-    var rat = drc.parseRepoAndTag(args[0]);
+    var rat = drc.parseRepoAndRef(args[0]);
     console.log('Repo:', rat.canonicalName);
     var client = drc.createClientV2({
         scheme: rat.index.scheme,
@@ -63,14 +63,16 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     }
 
     var manifest;
+    var digest;
     var slug = rat.localName.replace(/[^\w]+/, '-') + '-' +
         (rat.tag ? rat.tag : rat.digest.slice(0, 12));
 
     vasync.pipeline({funcs: [
         function getTheManifest(_, next) {
             var ref = rat.tag || rat.digest;
-            client.getManifest({ref: ref}, function (err, manifest_) {
+            client.getManifest({ref: ref}, function (err, manifest_, res) {
                 manifest = manifest_;
+                digest = res.headers['docker-content-digest'];
                 next(err);
             });
         },
@@ -162,6 +164,11 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                 bar.end();
                 bar = null;
             }
+            next();
+        },
+
+        function printDigest(_, next) {
+            console.log('Digest:', digest);
             next();
         }
 

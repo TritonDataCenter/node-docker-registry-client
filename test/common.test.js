@@ -15,6 +15,137 @@ var common = require('../lib/common');
 
 // --- Tests
 
+test('parseRepoAndRef', function (t) {
+    var parseRepoAndRef = common.parseRepoAndRef;
+
+    t.deepEqual(parseRepoAndRef('busybox'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": true,
+        "remoteName": "library/busybox",
+        "localName": "busybox",
+        "canonicalName": "docker.io/busybox",
+        "tag": "latest"
+    });
+    t.deepEqual(parseRepoAndRef('google/python'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": false,
+        "remoteName": "google/python",
+        "localName": "google/python",
+        "canonicalName": "docker.io/google/python",
+        "tag": "latest"
+    });
+    t.deepEqual(parseRepoAndRef('docker.io/ubuntu'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": true,
+        "remoteName": "library/ubuntu",
+        "localName": "ubuntu",
+        "canonicalName": "docker.io/ubuntu",
+        "tag": "latest"
+    });
+    t.deepEqual(parseRepoAndRef('localhost:5000/blarg'), {
+        "index": {
+            "name": "localhost:5000",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "blarg",
+        "localName": "localhost:5000/blarg",
+        "canonicalName": "localhost:5000/blarg",
+        "tag": "latest"
+    });
+
+    t.deepEqual(parseRepoAndRef('localhost:5000/blarg:latest'), {
+        "index": {
+            "name": "localhost:5000",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "blarg",
+        "localName": "localhost:5000/blarg",
+        "canonicalName": "localhost:5000/blarg",
+        "tag": "latest"
+    });
+    t.deepEqual(parseRepoAndRef('localhost:5000/blarg:mytag'), {
+        "index": {
+            "name": "localhost:5000",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "blarg",
+        "localName": "localhost:5000/blarg",
+        "canonicalName": "localhost:5000/blarg",
+        "tag": "mytag"
+    });
+    t.deepEqual(parseRepoAndRef('localhost:5000/blarg@sha256:cafebabe'), {
+        "index": {
+            "name": "localhost:5000",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "blarg",
+        "localName": "localhost:5000/blarg",
+        "canonicalName": "localhost:5000/blarg",
+        "digest": "sha256:cafebabe"
+    });
+
+    // With alternate default index.
+    t.deepEqual(parseRepoAndRef('foo/bar', 'docker.io'), {
+        "index": {
+            "name": "docker.io",
+            "official": true
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "foo/bar",
+        "canonicalName": "docker.io/foo/bar",
+        "tag": "latest"
+    });
+
+    var defaultIndex = 'https://myreg.example.com:1234';
+    t.deepEqual(parseRepoAndRef('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar",
+        "tag": "latest"
+    });
+
+    defaultIndex = {
+        "scheme": "https",
+        "name": "myreg.example.com:1234",
+        "official": false
+    };
+    t.deepEqual(parseRepoAndRef('foo/bar', defaultIndex), {
+        "index": {
+            "scheme": "https",
+            "name": "myreg.example.com:1234",
+            "official": false
+        },
+        "official": false,
+        "remoteName": "foo/bar",
+        "localName": "myreg.example.com:1234/foo/bar",
+        "canonicalName": "myreg.example.com:1234/foo/bar",
+        "tag": "latest"
+    });
+
+    t.end();
+});
+
+
 test('parseRepoAndTag', function (t) {
     var parseRepoAndTag = common.parseRepoAndTag;
 
