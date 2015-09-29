@@ -39,8 +39,11 @@ test('v2 docker.io', function (tt) {
     tt.test('  ping', function (t) {
         client.ping(function (err, body, res) {
             t.ok(err);
-            t.equal(res.statusCode, 401);
-            t.ok(res.headers['www-authenticate']);
+            t.ok(res, 'have a response');
+            if (res) {
+                t.equal(res.statusCode, 401);
+                t.ok(res.headers['www-authenticate']);
+            }
             t.end();
         })
     });
