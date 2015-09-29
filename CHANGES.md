@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 2.0.1 (not yet released)
+
+(nothing yet)
+
+
 ## 2.0.0
 
 - A start at Docker Registry API v2 support. For now just *pull* support (the
