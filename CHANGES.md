@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 2.0.1 (not yet released)
+## 2.0.1
 
 - DOCKER-580 Fix "too few args to sprintf" error when failing token auth.
 - Fix passing through of username (for token 'account' field) and basic
