@@ -2,7 +2,9 @@
 
 ## 2.0.1 (not yet released)
 
-(nothing yet)
+- DOCKER-580 Fix "too few args to sprintf" error when failing token auth.
+- Fix passing through of username (for token 'account' field) and basic
+  authorization for token auth.
 
 
 ## 2.0.0
