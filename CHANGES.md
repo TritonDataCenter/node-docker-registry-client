@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 2.0.2 (not yet released)
+## 2.0.2
 
 - DOCKER-583: Docker pull from v1 private registry failed with Resource Not Found error
 
