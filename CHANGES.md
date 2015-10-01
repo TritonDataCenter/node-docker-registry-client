@@ -2,8 +2,7 @@
 
 ## 2.0.2 (not yet released)
 
-(nothing yet)
-
+- DOCKER-583: Docker pull from v1 private registry failed with Resource Not Found error
 
 ## 2.0.1
 
