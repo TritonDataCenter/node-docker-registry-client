@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.0.2 (not yet released)
+
+(nothing yet)
+
+
 ## 3.0.1
 
 - DOCKER-586 Allow `opts.proxy` to be a boolean.
