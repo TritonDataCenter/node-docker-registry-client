@@ -1,3 +1,4 @@
+- test case for docker hub v1 private repo pull
 - v2 push support (complete the v2 api)
 - examples/listTags.js (or whatever name) to show how to key of v1 or v2
   automatically determined.

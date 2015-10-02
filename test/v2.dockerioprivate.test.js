@@ -8,6 +8,22 @@
  * Copyright (c) 2015, Joyent, Inc.
  */
 
+/*
+ * Test Docker Hub with a private repo.
+ *
+ * This requires a test/config.json something like this:
+ *
+ *      {
+ *          "dockerioprivate": {
+ *              "repo": "trentm/my-priv-repo
+ *              "username": "trentm",
+ *              "password": "(your password)",
+ *              "tag": "latest"
+ *          }
+ *      }
+ */
+
+var assert = require('assert-plus');
 var crypto = require('crypto');
 var strsplit = require('strsplit');
 var test = require('tape');
@@ -19,20 +35,36 @@ var drc = require('..');
 
 var log = require('./lib/log');
 
-var REPO = 'busybox';
-var TAG = 'latest';
+var CONFIG;
+try {
+    CONFIG = require(__dirname + '/config.json').dockerioprivate;
+    assert.object(CONFIG, 'config.json#jfrogartifactory');
+    assert.string(CONFIG.repo, 'CONFIG.repo');
+    assert.string(CONFIG.tag, 'CONFIG.tag');
+    assert.string(CONFIG.username, 'CONFIG.username');
+    assert.string(CONFIG.password, 'CONFIG.password');
+} catch (e) {
+    CONFIG = null;
+    log.warn(e, 'skipping Docker Hub private repo tests: ' +
+        'could not load "dockerioprivate" key from test/config.json');
+    console.warn("# warning: skipping Docker Hub private repo tests: %s",
+        e.message);
+}
 
 
 
 // --- Tests
 
-test('v2 docker.io', function (tt) {
+if (CONFIG)
+test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     var client;
-    var repo = drc.parseRepo(REPO);
+    var repo = drc.parseRepo(CONFIG.repo);
 
     tt.test('  createClient', function (t) {
         client = drc.createClientV2({
-            name: REPO,
+            name: CONFIG.repo,
+            username: CONFIG.username,
+            password: CONFIG.password,
             log: log
         });
         t.ok(client);
@@ -64,7 +96,8 @@ test('v2 docker.io', function (tt) {
             t.ifErr(err);
             t.ok(tags);
             t.equal(tags.name, repo.remoteName);
-            t.ok(tags.tags.indexOf(TAG) !== -1, 'no "'+TAG+'" tag');
+            t.ok(tags.tags.indexOf(CONFIG.tag) !== -1,
+                'no "'+CONFIG.tag+'" tag');
             t.end();
         });
     });
@@ -86,14 +119,14 @@ test('v2 docker.io', function (tt) {
     var manifest;
     var manifestDigest;
     tt.test('  getManifest', function (t) {
-        client.getManifest({ref: TAG}, function (err, manifest_, res) {
+        client.getManifest({ref: CONFIG.tag}, function (err, manifest_, res) {
             t.ifErr(err);
             manifest = manifest_;
             manifestDigest = res.headers['docker-content-digest'];
             t.ok(manifest);
             t.equal(manifest.schemaVersion, 1);
             t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, TAG);
+            t.equal(manifest.tag, CONFIG.tag);
             t.ok(manifest.architecture);
             t.ok(manifest.fsLayers);
             t.ok(manifest.history[0].v1Compatibility);

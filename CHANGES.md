@@ -1,8 +1,20 @@
 # node-docker-registry-client Changelog
 
-## 2.0.3 (not yet released)
+## 3.0.0 (not yet released)
 
-(nothing yet)
+- DOCKER-586 Add `drc.pingV2`, `drc.loginV2` and `drc.login`. The latter knows
+  how to login to a Docker Registry API via v1 or v2 (discovering which
+  properly).
+
+- (Backward incompatible.) The callback from `pingV1` has this form:
+        function (err, result)
+  That result has changed from:
+        {"Status": "(string status)"}    # old
+  to:
+        {"status": "(string status)"}    # new (lowercase 'status')
+  because (a) let's not depart from the typical starts-with-lowercase naming
+  in this module just to follow the form of the Docker Remote API "GET /auth"
+  response, and (b) this will mean being compatible with `pingV2`.
 
 
 ## 2.0.2

@@ -37,7 +37,7 @@ test('v1 quay.io', function (tt) {
     tt.test(' search', function (t) {
         client.search({term: 'elasticsearch'}, function (err, results, res) {
             t.ifErr(err);
-            t.ok(results)
+            t.ok(results);
             t.ok(results.num_results);
             var es = results.results.filter(
                 function (r) { return r.name === 'quay/elasticsearch'; })[0];
@@ -102,9 +102,9 @@ test('v1 quay.io', function (tt) {
 
     tt.test(' getImgLayerStream', function (t) {
         var imgId = repoTags[tag];
-        client.getImgLayerStream({imgId: imgId}, function (err, stream) {
-            t.ifErr(err, 'no error');
-            if (err) {
+        client.getImgLayerStream({imgId: imgId}, function (getErr, stream) {
+            t.ifErr(getErr, 'no error');
+            if (getErr) {
                 return t.end();
             }
 
@@ -121,7 +121,7 @@ test('v1 quay.io', function (tt) {
             stream.on('end', function () {
                 t.ok(numBytes > 0, 'downloaded ' + numBytes + ' bytes');
                 t.end();
-            })
+            });
             stream.resume();
         });
     });

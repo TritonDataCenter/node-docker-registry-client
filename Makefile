@@ -15,7 +15,7 @@
 #
 # Files
 #
-JS_FILES	:= $(shell find examples lib -name '*.js')
+JS_FILES	:= $(shell find examples test lib -name '*.js')
 JSON_FILES	 = package.json
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE	 = $(JS_FILES)

@@ -15,28 +15,35 @@ var mainline = require('../mainline');
 
 // Shared mainline with examples/foo.js to get CLI opts.
 var cmd = 'ping';
-mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
-    var name = args[0];
-    if (!name) {
-        console.error('usage: node examples/v2/%s.js REPO\n' +
+mainline({cmd: cmd}, function (log, parser, opts, args) {
+    if (opts.help) {
+        console.error('usage: node examples/v2/%s.js [INDEX]\n' +
             '\n' +
             'options:\n' +
             '%s', cmd, parser.help().trimRight());
-        process.exit(2);
+        process.exit(0);
     }
 
+    // `docker login` defaults to this URL. Let's do the same.
+    var indexName = args[0] || 'https://index.docker.io/v1/';
+
     // The interesting stuff starts here.
-    var reg = drc.createClientV2({
-        name: name,
-        insecure: opts.insecure,
-        log: log
-    });
-    reg.ping(function (err, status, res) {
-        reg.close();
+    drc.pingV2({
+        indexName: indexName,
+        log: log,
+        username: opts.username,
+        password: opts.password,
+        insecure: opts.insecure
+    }, function (err, body, res, req) {
+        if (res) {
+            console.log('HTTP status: %s', res.statusCode);
+            console.log('Headers:', JSON.stringify(res.headers, null, 4));
+            if (res.statusCode === 200) {
+                console.log('Body: ', JSON.stringify(body, null, 4));
+            }
+        }
         if (err) {
             mainline.fail(cmd, err, opts);
         }
-        console.log('status: %j', status);
-        console.log('HTTP status: %s', res.statusCode);
     });
 });

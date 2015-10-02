@@ -11,11 +11,7 @@
  */
 
 /*
- * This shows roughly how a Docker Engine would handle the server-side of
- * a "check auth" Remote API request:
- *      // JSSTYLED
- *      http://docs.docker.com/reference/api/docker_remote_api_v1.18/#check-auth-configuration
- * as is called by `docker login`.
+ * Login to a Docker Registry (whether it is v1 or v2).
  *
  * Usage:
  *      node examples/login.js [INDEX-NAME]
@@ -36,7 +32,7 @@ var format = require('util').format;
 var read = require('read');
 var vasync = require('vasync');
 
-var drc = require('../../');
+var drc = require('../');
 
 
 
@@ -65,18 +61,24 @@ var log = bunyan.createLogger({
     level: logLevel
 });
 
-var indexName = process.argv[2] || 'docker.io';
-if (!indexName) {
-    console.error('usage: node examples/v1/%s.js [INDEX]', cmd);
+
+// `docker login` with no args passes
+// `serveraddress=https://index.docker.io/v1/` (yes, "v1", even in a v2 world).
+var indexName = process.argv[2] || 'https://index.docker.io/v1/';
+if (indexName === '-h' || indexName === '--help') {
+    console.error('usage: node examples/v2/%s.js [INDEX] [USERNAME] ' +
+        '[PASSWORD] [EMAIL]', cmd);
     process.exit(2);
 }
 
-
-var username;
-var email;
-var password;
+var username = process.argv[3];
+var password = process.argv[4];
+var email = process.argv[5];
 vasync.pipeline({funcs: [
     function getUsername(_, next) {
+        if (username) {
+            return next();
+        }
         read({prompt: 'Username:'}, function (err, val) {
             if (err) {
                 return next(err);
@@ -86,6 +88,9 @@ vasync.pipeline({funcs: [
         });
     },
     function getPassword(_, next) {
+        if (password) {
+            return next();
+        }
         read({prompt: 'Password:', silent: true}, function (err, val) {
             if (err) {
                 return next(err);
@@ -95,6 +100,9 @@ vasync.pipeline({funcs: [
         });
     },
     function getEmail(_, next) {
+        if (email) {
+            return next();
+        }
         read({prompt: 'Email:'}, function (err, val) {
             if (err) {
                 return next(err);
@@ -105,7 +113,7 @@ vasync.pipeline({funcs: [
         });
     },
     function doLogin(_, next) {
-        drc.loginV1({
+        drc.login({
             indexName: indexName,
             log: log,
             // TODO: insecure: insecure,

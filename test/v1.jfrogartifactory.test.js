@@ -38,7 +38,7 @@ var drc = require('..');
 // --- globals
 
 var log = require('./lib/log');
-var CONFIG
+var CONFIG;
 try {
     CONFIG = require(__dirname + '/config.json').jfrogartifactory;
     assert.object(CONFIG, 'config.json#jfrogartifactory');
@@ -50,7 +50,7 @@ try {
 } catch (e) {
     CONFIG = null;
     log.warn(e, 'skipping jfrog artifactory tests: ' +
-        'could not load "jfrogartifactory" key from test/config.json')
+        'could not load "jfrogartifactory" key from test/config.json');
     console.warn("# warning: skipping jfrog artifactory tests: %s",
         e.message);
 }
@@ -80,7 +80,7 @@ test('v1 jfrog artifactory: ' + CONFIG.repo, function (tt) {
         client.search({term: CONFIG.searchTerm}, function (err, results, res) {
             t.ifErr(err);
             if (!err) {
-                t.ok(results)
+                t.ok(results);
                 t.ok(results.num_results);
                 var hit = results.results.filter(function (r) {
                     return r.name.indexOf(repo.remoteName) !== -1;
@@ -147,9 +147,9 @@ test('v1 jfrog artifactory: ' + CONFIG.repo, function (tt) {
 
     tt.test(' getImgLayerStream', function (t) {
         var imgId = repoTags[tag];
-        client.getImgLayerStream({imgId: imgId}, function (err, stream) {
-            t.ifErr(err, 'no error');
-            if (err) {
+        client.getImgLayerStream({imgId: imgId}, function (getErr, stream) {
+            t.ifErr(getErr, 'no error');
+            if (getErr) {
                 return t.end();
             }
 
@@ -166,7 +166,7 @@ test('v1 jfrog artifactory: ' + CONFIG.repo, function (tt) {
             stream.on('end', function () {
                 t.ok(numBytes > 0, 'downloaded ' + numBytes + ' bytes');
                 t.end();
-            })
+            });
             stream.resume();
         });
     });

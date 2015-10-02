@@ -21,6 +21,11 @@ var read = require('read');
 
 var options = [
     {
+        names: ['help', 'h'],
+        type: 'bool',
+        help: 'Print this help and exit.'
+    },
+    {
         names: ['verbose', 'v'],
         type: 'bool',
         help: 'Verbose logging.'
@@ -43,6 +48,11 @@ var options = [
 ];
 
 var optionsNoAuth = [
+    {
+        names: ['help', 'h'],
+        type: 'bool',
+        help: 'Print this help and exit.'
+    },
     {
         names: ['verbose', 'v'],
         type: 'bool',
