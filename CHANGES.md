@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.0.1 (not yet released)
+
+(nothing yet)
+
+
 ## 3.0.0
 
 - DOCKER-586 Add `drc.pingV2`, `drc.loginV2` and `drc.login`. The latter knows
