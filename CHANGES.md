@@ -2,7 +2,7 @@
 
 ## 3.0.1 (not yet released)
 
-(nothing yet)
+- DOCKER-586 Allow `opts.proxy` to be a boolean.
 
 
 ## 3.0.0
