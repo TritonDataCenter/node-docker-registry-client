@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.0.0 (not yet released)
+## 3.0.0
 
 - DOCKER-586 Add `drc.pingV2`, `drc.loginV2` and `drc.login`. The latter knows
   how to login to a Docker Registry API via v1 or v2 (discovering which
