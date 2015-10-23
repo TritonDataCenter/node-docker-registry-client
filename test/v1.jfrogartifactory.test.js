@@ -51,7 +51,7 @@ try {
     CONFIG = null;
     log.warn(e, 'skipping jfrog artifactory tests: ' +
         'could not load "jfrogartifactory" key from test/config.json');
-    console.warn("# warning: skipping jfrog artifactory tests: %s",
+    console.warn('# warning: skipping jfrog artifactory tests: %s',
         e.message);
 }
 
@@ -108,7 +108,7 @@ test('v1 jfrog artifactory: ' + CONFIG.repo, function (tt) {
         client.listRepoTags(function (err, repoTags_) {
             repoTags = repoTags_;
             t.ifErr(err);
-            t.equal(typeof(repoTags), 'object');
+            t.equal(typeof (repoTags), 'object');
             t.ok(repoTags[tag]);
             t.ok(/[0-9a-f]{64}/.test(repoTags[tag]));
             t.end();

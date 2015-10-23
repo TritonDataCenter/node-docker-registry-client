@@ -72,7 +72,7 @@ test('v1 docker.io', function (tt) {
         client.listRepoTags(function (err, repoTags_) {
             repoTags = repoTags_;
             t.ifErr(err);
-            t.equal(typeof(repoTags), 'object');
+            t.equal(typeof (repoTags), 'object');
             t.ok(repoTags[tag]);
             t.ok(/[0-9a-f]{64}/.test(repoTags[tag]));
             t.end();

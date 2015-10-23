@@ -47,7 +47,7 @@ try {
     CONFIG = null;
     log.warn(e, 'skipping Docker Hub private repo tests: ' +
         'could not load "dockerioprivate" key from test/config.json');
-    console.warn("# warning: skipping Docker Hub private repo tests: %s",
+    console.warn('# warning: skipping Docker Hub private repo tests: %s',
         e.message);
 }
 

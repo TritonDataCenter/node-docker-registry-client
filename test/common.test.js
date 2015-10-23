@@ -19,127 +19,127 @@ test('parseRepoAndRef', function (t) {
     var parseRepoAndRef = common.parseRepoAndRef;
 
     t.deepEqual(parseRepoAndRef('busybox'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/busybox",
-        "localName": "busybox",
-        "canonicalName": "docker.io/busybox",
-        "tag": "latest"
+        'official': true,
+        'remoteName': 'library/busybox',
+        'localName': 'busybox',
+        'canonicalName': 'docker.io/busybox',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndRef('google/python'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "google/python",
-        "localName": "google/python",
-        "canonicalName": "docker.io/google/python",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'google/python',
+        'localName': 'google/python',
+        'canonicalName': 'docker.io/google/python',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndRef('docker.io/ubuntu'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/ubuntu",
-        "localName": "ubuntu",
-        "canonicalName": "docker.io/ubuntu",
-        "tag": "latest"
+        'official': true,
+        'remoteName': 'library/ubuntu',
+        'localName': 'ubuntu',
+        'canonicalName': 'docker.io/ubuntu',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndRef('localhost:5000/blarg'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'latest'
     });
 
     t.deepEqual(parseRepoAndRef('localhost:5000/blarg:latest'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndRef('localhost:5000/blarg:mytag'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "mytag"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'mytag'
     });
     t.deepEqual(parseRepoAndRef('localhost:5000/blarg@sha256:cafebabe'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "digest": "sha256:cafebabe"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'digest': 'sha256:cafebabe'
     });
 
     // With alternate default index.
     t.deepEqual(parseRepoAndRef('foo/bar', 'docker.io'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "foo/bar",
-        "canonicalName": "docker.io/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'foo/bar',
+        'canonicalName': 'docker.io/foo/bar',
+        'tag': 'latest'
     });
 
     var defaultIndex = 'https://myreg.example.com:1234';
     t.deepEqual(parseRepoAndRef('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar',
+        'tag': 'latest'
     });
 
     defaultIndex = {
-        "scheme": "https",
-        "name": "myreg.example.com:1234",
-        "official": false
+        'scheme': 'https',
+        'name': 'myreg.example.com:1234',
+        'official': false
     };
     t.deepEqual(parseRepoAndRef('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar',
+        'tag': 'latest'
     });
 
     t.end();
@@ -150,127 +150,127 @@ test('parseRepoAndTag', function (t) {
     var parseRepoAndTag = common.parseRepoAndTag;
 
     t.deepEqual(parseRepoAndTag('busybox'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/busybox",
-        "localName": "busybox",
-        "canonicalName": "docker.io/busybox",
-        "tag": "latest"
+        'official': true,
+        'remoteName': 'library/busybox',
+        'localName': 'busybox',
+        'canonicalName': 'docker.io/busybox',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndTag('google/python'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "google/python",
-        "localName": "google/python",
-        "canonicalName": "docker.io/google/python",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'google/python',
+        'localName': 'google/python',
+        'canonicalName': 'docker.io/google/python',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndTag('docker.io/ubuntu'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/ubuntu",
-        "localName": "ubuntu",
-        "canonicalName": "docker.io/ubuntu",
-        "tag": "latest"
+        'official': true,
+        'remoteName': 'library/ubuntu',
+        'localName': 'ubuntu',
+        'canonicalName': 'docker.io/ubuntu',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndTag('localhost:5000/blarg'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'latest'
     });
 
     t.deepEqual(parseRepoAndTag('localhost:5000/blarg:latest'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'latest'
     });
     t.deepEqual(parseRepoAndTag('localhost:5000/blarg:mytag'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "tag": "mytag"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'tag': 'mytag'
     });
     t.deepEqual(parseRepoAndTag('localhost:5000/blarg@sha256:cafebabe'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg",
-        "digest": "sha256:cafebabe"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg',
+        'digest': 'sha256:cafebabe'
     });
 
     // With alternate default index.
     t.deepEqual(parseRepoAndTag('foo/bar', 'docker.io'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "foo/bar",
-        "canonicalName": "docker.io/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'foo/bar',
+        'canonicalName': 'docker.io/foo/bar',
+        'tag': 'latest'
     });
 
     var defaultIndex = 'https://myreg.example.com:1234';
     t.deepEqual(parseRepoAndTag('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar',
+        'tag': 'latest'
     });
 
     defaultIndex = {
-        "scheme": "https",
-        "name": "myreg.example.com:1234",
-        "official": false
+        'scheme': 'https',
+        'name': 'myreg.example.com:1234',
+        'official': false
     };
     t.deepEqual(parseRepoAndTag('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar",
-        "tag": "latest"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar',
+        'tag': 'latest'
     });
 
     t.end();
@@ -281,86 +281,86 @@ test('parseRepo', function (t) {
     var parseRepo = common.parseRepo;
 
     t.deepEqual(parseRepo('busybox'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/busybox",
-        "localName": "busybox",
-        "canonicalName": "docker.io/busybox"
+        'official': true,
+        'remoteName': 'library/busybox',
+        'localName': 'busybox',
+        'canonicalName': 'docker.io/busybox'
     });
     t.deepEqual(parseRepo('google/python'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "google/python",
-        "localName": "google/python",
-        "canonicalName": "docker.io/google/python"
+        'official': false,
+        'remoteName': 'google/python',
+        'localName': 'google/python',
+        'canonicalName': 'docker.io/google/python'
     });
     t.deepEqual(parseRepo('docker.io/ubuntu'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": true,
-        "remoteName": "library/ubuntu",
-        "localName": "ubuntu",
-        "canonicalName": "docker.io/ubuntu"
+        'official': true,
+        'remoteName': 'library/ubuntu',
+        'localName': 'ubuntu',
+        'canonicalName': 'docker.io/ubuntu'
     });
     t.deepEqual(parseRepo('localhost:5000/blarg'), {
-        "index": {
-            "name": "localhost:5000",
-            "official": false
+        'index': {
+            'name': 'localhost:5000',
+            'official': false
         },
-        "official": false,
-        "remoteName": "blarg",
-        "localName": "localhost:5000/blarg",
-        "canonicalName": "localhost:5000/blarg"
+        'official': false,
+        'remoteName': 'blarg',
+        'localName': 'localhost:5000/blarg',
+        'canonicalName': 'localhost:5000/blarg'
     });
 
     // With alternate default index.
     t.deepEqual(parseRepo('foo/bar', 'docker.io'), {
-        "index": {
-            "name": "docker.io",
-            "official": true
+        'index': {
+            'name': 'docker.io',
+            'official': true
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "foo/bar",
-        "canonicalName": "docker.io/foo/bar"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'foo/bar',
+        'canonicalName': 'docker.io/foo/bar'
     });
 
     var defaultIndex = 'https://myreg.example.com:1234';
     t.deepEqual(parseRepo('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar'
     });
 
     defaultIndex = {
-        "scheme": "https",
-        "name": "myreg.example.com:1234",
-        "official": false
+        'scheme': 'https',
+        'name': 'myreg.example.com:1234',
+        'official': false
     };
     t.deepEqual(parseRepo('foo/bar', defaultIndex), {
-        "index": {
-            "scheme": "https",
-            "name": "myreg.example.com:1234",
-            "official": false
+        'index': {
+            'scheme': 'https',
+            'name': 'myreg.example.com:1234',
+            'official': false
         },
-        "official": false,
-        "remoteName": "foo/bar",
-        "localName": "myreg.example.com:1234/foo/bar",
-        "canonicalName": "myreg.example.com:1234/foo/bar"
+        'official': false,
+        'remoteName': 'foo/bar',
+        'localName': 'myreg.example.com:1234/foo/bar',
+        'canonicalName': 'myreg.example.com:1234/foo/bar'
     });
 
     t.end();
@@ -371,41 +371,41 @@ test('parseIndex', function (t) {
     var parseIndex = common.parseIndex;
 
     t.deepEqual(parseIndex('docker.io'), {
-        "name": "docker.io",
-        "official": true
+        'name': 'docker.io',
+        'official': true
     });
     t.deepEqual(parseIndex('index.docker.io'), {
-        "name": "docker.io",
-        "official": true
+        'name': 'docker.io',
+        'official': true
     });
     t.deepEqual(parseIndex('https://docker.io'), {
-        "name": "docker.io",
-        "official": true,
-        "scheme": "https"
+        'name': 'docker.io',
+        'official': true,
+        'scheme': 'https'
     });
     t.throws(function () { parseIndex('http://docker.io'); },
         /disallowed/);
     t.deepEqual(parseIndex('index.docker.io'), {
-        "name": "docker.io",
-        "official": true
+        'name': 'docker.io',
+        'official': true
     });
     t.deepEqual(parseIndex('quay.io'), {
-        "name": "quay.io",
-        "official": false
+        'name': 'quay.io',
+        'official': false
     });
     t.deepEqual(parseIndex('https://quay.io'), {
-        "name": "quay.io",
-        "official": false,
-        "scheme": "https"
+        'name': 'quay.io',
+        'official': false,
+        'scheme': 'https'
     });
     t.deepEqual(parseIndex('http://quay.io'), {
-        "name": "quay.io",
-        "official": false,
-        "scheme": "http"
+        'name': 'quay.io',
+        'official': false,
+        'scheme': 'http'
     });
     t.deepEqual(parseIndex('localhost:5000'), {
-        "name": "localhost:5000",
-        "official": false
+        'name': 'localhost:5000',
+        'official': false
     });
 
     t.throws(function () { parseIndex('https://'); },
@@ -416,8 +416,8 @@ test('parseIndex', function (t) {
         /look/);
 
     t.deepEqual(parseIndex('docker.io/'), {
-        "name": "docker.io",
-        "official": true
+        'name': 'docker.io',
+        'official': true
     });
     t.throws(function () { parseIndex('docker.io/foo'); },
         /invalid/);
