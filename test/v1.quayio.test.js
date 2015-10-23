@@ -34,7 +34,8 @@ test('v1 quay.io', function (tt) {
         });
     });
 
-    tt.test(' search', function (t) {
+    // DOCKER-604 skip this test for now, quay.io search is busted.
+    tt.skip(' search', function (t) {
         client.search({term: 'elasticsearch'}, function (err, results, res) {
             t.ifErr(err);
             t.ok(results);
