@@ -2,7 +2,10 @@
 
 ## 3.0.2 (not yet released)
 
-(nothing yet)
+- DOCKER-622: Tests for quay.io v2: working without auth, fails with auth.
+  `make test` is currently wired to skip the known failing v2 quay.io private
+  tests. Will revisit this later.  See "test/v2.quayio.test.js" for some
+  notes on what I think are quay.io v2 bugs that I'll report.
 
 
 ## 3.0.1
