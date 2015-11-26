@@ -156,21 +156,23 @@ endpoints](https://docs.docker.com/registry/spec/api/#detail) to the API
 equivalents in this client lib. "NYI" means the endpoint is not yet implemented
 by this client lib.
 
-| Name                | Endpoint | Description |
-| ------------------- | -------- | ----------- |
-| ping                | `GET /v2/` | Check that the endpoint implements Docker Registry API V2. |
-| listTags            | `GET /v2/<name>/tags/list` | Fetch the tags under the repository identified by `name`. |
-| getManifest         | `GET /v2/<name>/manifests/<reference>` | Fetch the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
-| putManifest         | `PUT /v2/<name>/manifests/<reference>` | **NYI.** Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
-| deleteManifest      | `DELETE /v2/<name>/manifests/<reference>` | **NYI.** Delete the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| Name                 | Endpoint | Description |
+| -------------------- | -------- | ----------- |
+| ping                 | `GET /v2/` | Check that the endpoint implements Docker Registry API V2. |
+| listTags             | `GET /v2/<name>/tags/list` | Fetch the tags under the repository identified by `name`. |
+| getManifest          | `GET /v2/<name>/manifests/<reference>` | Fetch the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| putManifest          | `PUT /v2/<name>/manifests/<reference>` | **NYI.** Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
+| deleteManifest       | `DELETE /v2/<name>/manifests/<reference>` | **NYI.** Delete the manifest identified by `name` and `reference` where `reference` can be a tag or digest. |
 | createBlobReadStream | `GET /v2/<name>/blobs/<digest>` | Retrieve the blob from the registry identified by `digest`. |
-| headBlob            | `HEAD /v2/<name>/blobs/<digest>` | Retrieve the blob from the registry identified by `digest` -- just the headers. |
-| startBlobUpload     | `POST /v2/<name>/blobs/uploads/` | **NYI.** Initiate a resumable blob upload. If successful, an upload location will be provided to complete the upload. Optionally, if the `digest` parameter is present, the request body will be used to complete the upload in a single request. |
-| getBlobUploadStatus | `GET /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Retrieve status of upload identified by `uuid`. The primary purpose of this endpoint is to resolve the current status of a resumable upload. |
-| uploadBlobChunk     | `PATCH /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Upload a chunk of data for the specified upload. |
-| completeBlobUpload  | `PUT /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Complete the upload specified by `uuid`, optionally appending the body as the final chunk. |
-| cancelBlobUpload    | `DELETE /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout. |
-| listRepositories    | `GET /v2/_catalog/` | **NYI** List all repositories in this registry. [Spec.](https://docs.docker.com/registry/spec/api/#listing-repositories) |
+| headBlob             | `HEAD /v2/<name>/blobs/<digest>` | Retrieve the blob from the registry identified by `digest` -- just the headers. |
+| startBlobUpload      | `POST /v2/<name>/blobs/uploads/` | **NYI.** Initiate a resumable blob upload. If successful, an upload location will be provided to complete the upload. Optionally, if the `digest` parameter is present, the request body will be used to complete the upload in a single request. |
+| getBlobUploadStatus  | `GET /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Retrieve status of upload identified by `uuid`. The primary purpose of this endpoint is to resolve the current status of a resumable upload. |
+| uploadBlobChunk      | `PATCH /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Upload a chunk of data for the specified upload. |
+| completeBlobUpload   | `PUT /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Complete the upload specified by `uuid`, optionally appending the body as the final chunk. |
+| cancelBlobUpload     | `DELETE /v2/<name>/blobs/uploads/<uuid>` | **NYI.** Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout. |
+| deleteBlob           | `DELETE /v2/<name>/blobs/<digest>` | **NYI.** Delete the blob identified by `name` and `digest`. Warning: From the Docker spec I'm not sure that `deleteBlob` doesn't corrupt images if you delete a shared blob. |
+| listRepositories     | `GET /v2/_catalog/` | **NYI** List all repositories in this registry. [Spec.](https://docs.docker.com/registry/spec/api/#listing-repositories) |
+
 
 See ["examples/v2/*.js"](./examples/) for short code examples one can run from
 the CLI for each API endpoint. E.g.:

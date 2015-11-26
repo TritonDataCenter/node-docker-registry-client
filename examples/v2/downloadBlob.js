@@ -24,7 +24,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         console.error('usage: node examples/v2/%s.js REPO@DIGEST\n' +
             '\n' +
             'options:\n' +
-            '%s', cmd, cmd, parser.help().trimRight());
+            '%s', cmd, parser.help().trimRight());
         process.exit(2);
     }
 

@@ -19,14 +19,16 @@ var drc = require('..');
 
 var log = require('./lib/log');
 
-var REPO = 'busybox';
+var REPO = 'quay.io/coreos/etcd';
 var TAG = 'latest';
 
+// Trent will report these to "support@quay.io" and jzelinskie on #quay IRC
+var SKIP_QUAY_IO_BUGLETS = true;
 
 
 // --- Tests
 
-test('v2 docker.io', function (tt) {
+test('v2 quay.io', function (tt) {
     var client;
     var repo = drc.parseRepo(REPO);
 
@@ -40,6 +42,14 @@ test('v2 docker.io', function (tt) {
         t.end();
     });
 
+    tt.test('  supportsV2', function (t) {
+        client.supportsV2(function (err, supportsV2) {
+            t.ifErr(err);
+            t.ok(supportsV2, 'supportsV2');
+            t.end();
+        });
+    });
+
     tt.test('  ping', function (t) {
         client.ping(function (err, body, res) {
             t.ok(err);
@@ -48,6 +58,8 @@ test('v2 docker.io', function (tt) {
                 t.equal(res.statusCode, 401);
                 t.ok(res.headers['www-authenticate']);
             }
+            t.equal(res.headers['docker-distribution-api-version'],
+                'registry/2.0');
             t.end();
         });
     });
@@ -134,12 +146,25 @@ test('v2 docker.io', function (tt) {
             var first = ress[0];
             t.ok(first.statusCode === 200 || first.statusCode === 307);
             t.equal(first.headers['docker-content-digest'], digest);
-            t.equal(first.headers['docker-distribution-api-version'],
-                'registry/2.0');
+
+            // Docker-Distribution-Api-Version header:
+            // docker.io includes this header here, quay.io does not.
+            // t.equal(first.headers['docker-distribution-api-version'],
+            //    'registry/2.0');
+
             var last = ress[ress.length - 1];
             t.ok(last);
             t.equal(last.statusCode, 200);
-            t.equal(last.headers['content-type'], 'application/octet-stream');
+
+            // Content-Type:
+            // - docker.io gives 'application/octet-stream', which is what
+            //   I'd expect for the GET response at least.
+            // - quay.io current v2 support gives: 'text/html; charset=utf-8'
+            if (!SKIP_QUAY_IO_BUGLETS) {
+                t.equal(last.headers['content-type'],
+                    'application/octet-stream');
+            }
+
             t.ok(last.headers['content-length']);
             t.end();
         });
@@ -152,9 +177,19 @@ test('v2 docker.io', function (tt) {
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
             var res = ress[0];
-            t.equal(res.statusCode, 404);
-            t.equal(res.headers['docker-distribution-api-version'],
-                'registry/2.0');
+
+            // statusCode:
+            // - docker.io gives 404, which is what I'd expect
+            // - quay.io gives 405 (Method Not Allowed). Hrm.
+            // The spec doesn't specify:
+            // https://docs.docker.com/registry/spec/api/#existing-layers
+            // t.equal(res.statusCode, 404);
+
+            // Docker-Distribution-Api-Version header:
+            // docker.io includes this header here, quay.io does not.
+            // t.equal(res.headers['docker-distribution-api-version'],
+            //    'registry/2.0');
+
             t.end();
         });
     });
@@ -168,14 +203,29 @@ test('v2 docker.io', function (tt) {
             t.ok(ress);
             t.ok(Array.isArray(ress));
             var first = ress[0];
-            t.ok(first.statusCode === 200 || first.statusCode === 307);
+            // First request statusCode on a redirect:
+            // - quay.io gives 302 (Found)
+            // - docker.io gives 307
+            t.ok([200, 302, 307].indexOf(first.statusCode) !== -1,
+                'first request status code 200, 302 or 307: statusCode=' +
+                first.statusCode);
             t.equal(first.headers['docker-content-digest'], digest);
-            t.equal(first.headers['docker-distribution-api-version'],
-                'registry/2.0');
+
+            // Docker-Distribution-Api-Version header:
+            // docker.io includes this header here, quay.io does not.
+            // t.equal(first.headers['docker-distribution-api-version'],
+            //    'registry/2.0');
 
             t.ok(stream);
             t.equal(stream.statusCode, 200);
-            t.equal(stream.headers['content-type'], 'application/octet-stream');
+
+            // Quay.io gives `Content-Type: binary/octet-stream` which has to
+            // be a bug. AFAIK that isn't a real MIME type.
+            if (!SKIP_QUAY_IO_BUGLETS) {
+                t.equal(stream.headers['content-type'],
+                    'application/octet-stream');
+            }
+
             t.ok(stream.headers['content-length']);
 
             var numBytes = 0;
@@ -201,9 +251,19 @@ test('v2 docker.io', function (tt) {
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
             var res = ress[0];
-            t.equal(res.statusCode, 404);
-            t.equal(res.headers['docker-distribution-api-version'],
-                'registry/2.0');
+
+            // statusCode:
+            // - docker.io gives 404, which is what I'd expect
+            // - quay.io gives 405 (Method Not Allowed). Hrm.
+            // The spec doesn't specify:
+            // https://docs.docker.com/registry/spec/api/#existing-layers
+            // t.equal(res.statusCode, 404);
+
+            // Docker-Distribution-Api-Version header:
+            // docker.io includes this header here, quay.io does not.
+            // t.equal(res.headers['docker-distribution-api-version'],
+            //    'registry/2.0');
+
             t.end();
         });
     });

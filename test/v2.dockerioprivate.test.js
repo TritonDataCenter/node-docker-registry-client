@@ -38,7 +38,7 @@ var log = require('./lib/log');
 var CONFIG;
 try {
     CONFIG = require(__dirname + '/config.json').dockerioprivate;
-    assert.object(CONFIG, 'config.json#jfrogartifactory');
+    assert.object(CONFIG, 'config.json#dockerioprivate');
     assert.string(CONFIG.repo, 'CONFIG.repo');
     assert.string(CONFIG.tag, 'CONFIG.tag');
     assert.string(CONFIG.username, 'CONFIG.username');

@@ -64,16 +64,20 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
     var manifest;
     var digest;
-    var slug = rat.localName.replace(/[^\w]+/, '-') + '-' +
+    var slug = rat.localName.replace(/[^\w]+/g, '-') + '-' +
         (rat.tag ? rat.tag : rat.digest.slice(0, 12));
 
     vasync.pipeline({funcs: [
         function getTheManifest(_, next) {
             var ref = rat.tag || rat.digest;
             client.getManifest({ref: ref}, function (err, manifest_, res) {
+                if (err) {
+                    next(err);
+                    return;
+                }
                 manifest = manifest_;
                 digest = res.headers['docker-content-digest'];
-                next(err);
+                next();
             });
         },
 
