@@ -176,7 +176,7 @@ test('v2 quay.io', function (tt) {
             t.ok(ress);
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
-            var res = ress[0];
+            // var res = ress[0];
 
             // statusCode:
             // - docker.io gives 404, which is what I'd expect
@@ -250,7 +250,7 @@ test('v2 quay.io', function (tt) {
             t.ok(ress);
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
-            var res = ress[0];
+            // var res = ress[0];
 
             // statusCode:
             // - docker.io gives 404, which is what I'd expect
