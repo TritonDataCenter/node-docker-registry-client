@@ -2,6 +2,11 @@
 
 ## 3.0.2 (not yet released)
 
+- DOCKER-625: Fix v1 pull of 'rhel7' from Docker Hub, which *redirects*
+  to the registry.access.redhat.com repository.  Warning: This only
+  works if you know apriori to use v1... which typically you would NOT
+  know because Docker Hub supports v2.
+
 - DOCKER-625: Fix v1 API against registry.access.redhat.com. E.g.
   for `docker pull registry.access.redhat.com/rhel7`. This implementation of
   the Docker Registry v1 involves 3xx redirs for more endpoints. Needed to
