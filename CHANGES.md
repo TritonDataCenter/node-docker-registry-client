@@ -2,6 +2,11 @@
 
 ## 3.0.2 (not yet released)
 
+- DOCKER-625: Fix v1 API against registry.access.redhat.com. E.g.
+  for `docker pull registry.access.redhat.com/rhel7`. This implementation of
+  the Docker Registry v1 involves 3xx redirs for more endpoints. Needed to
+  support that.
+
 - DOCKER-622: Tests for quay.io v2: working without auth, fails with auth.
   `make test` is currently wired to skip the known failing v2 quay.io private
   tests. Will revisit this later.  See "test/v2.quayio.test.js" for some
