@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.0.3 (not yet released)
+
+(nothing yet)
+
+
 ## 3.0.2
 
 - DOCKER-625: Fix v1 pull of 'rhel7' from Docker Hub, which *redirects*
