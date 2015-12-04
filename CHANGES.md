@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.0.2 (not yet released)
+## 3.0.2
 
 - DOCKER-625: Fix v1 pull of 'rhel7' from Docker Hub, which *redirects*
   to the registry.access.redhat.com repository.  Warning: This only
