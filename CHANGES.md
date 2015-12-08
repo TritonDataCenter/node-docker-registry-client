@@ -2,7 +2,9 @@
 
 ## 3.0.3 (not yet released)
 
-(nothing yet)
+- DOCKER-627: Fix login for v2 quay.io. Two issues here:
+  1. quay.io has a bug where www-authenticate header isn't always in 401 response headers
+  2. passing "scope=" (empty value) query param to quay.io/v2/auth results in a 400
 
 
 ## 3.0.2
