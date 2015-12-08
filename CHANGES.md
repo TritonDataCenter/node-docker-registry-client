@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.0.3 (not yet released)
+## 3.0.3
 
 - DOCKER-627: Fix login for v2 quay.io. Two issues here:
   1. quay.io has a bug where www-authenticate header isn't always in 401 response headers
