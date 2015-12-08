@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.0.4 (not yet released)
+
+(nothing yet)
+
+
 ## 3.0.3
 
 - DOCKER-627: Fix login for v2 quay.io. Two issues here:
