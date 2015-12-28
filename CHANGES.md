@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.0.4 (not yet released)
+## 3.0.4
 
 - DOCKER-640: Fix assertion hit when attempting `getManifest` (or other v2 API
   endpoints) against a v2 Docker Registry that uses Basic auth **but when not
