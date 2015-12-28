@@ -41,7 +41,7 @@ all:
 # Note: *skipping* the known failing v2.quayioprivate.test.js for now.
 .PHONY: test
 test: | $(TAPE)
-	@$(TAPE) $(shell find test -name "*.test.js" | grep -v quayioprivate | xargs)
+	@$(TAPE) $(shell find test -name "*.test.js" | xargs)
 
 .PHONY: clean
 clean::

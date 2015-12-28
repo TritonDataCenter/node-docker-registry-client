@@ -9,19 +9,26 @@
  */
 
 /*
- * Test quay.io with a private repo.
+ * Test Docker v2 Registry in a jfrog artifactory repo, if there is a local
+ * config with repo details.
  *
  * This requires a test/config.json something like this:
  *
  *      {
- *          "quayioprivate": {
- *              "repo": "quay.io/trentm/my-priv-repo
- *              "username": "trentm",
+ *          "v2jfrogartifactory": {
+ *              "repo": "trentm.artifactoryonline.com/busybox",
+ *              "username": "admin",
  *              "password": "(your password)",
- *              "tag": "latest"
+ *              "tag": "latest",
+ *              "searchTerm": "busy"
  *          }
  *      }
+ *
+ * See DOCKER-419 for details on how to setup a Docker registry with
+ * a demo account of jfrog artifactory.
+ * <https://www.jfrog.com/artifactory/free-trial/>
  */
+
 
 var assert = require('assert-plus');
 var crypto = require('crypto');
@@ -37,33 +44,25 @@ var log = require('./lib/log');
 
 var CONFIG;
 try {
-    CONFIG = require(__dirname + '/config.json').quayioprivate;
-    assert.object(CONFIG, 'config.json#quayioprivate');
-} catch (e) {
-    CONFIG = null;
-    log.warn(e, 'skipping Quay.io private repo tests: ' +
-        'could not load "quayioprivate" key from test/config.json');
-    console.warn('# warning: skipping Quay.io private repo tests: %s',
-        e.message);
-}
-if (CONFIG) {
+    CONFIG = require(__dirname + '/config.json').v2jfrogartifactory;
+    assert.object(CONFIG, 'config.json#v2jfrogartifactory');
     assert.string(CONFIG.repo, 'CONFIG.repo');
     assert.string(CONFIG.tag, 'CONFIG.tag');
     assert.string(CONFIG.username, 'CONFIG.username');
     assert.string(CONFIG.password, 'CONFIG.password');
-    assert.ok(/^quay.io\//.test(CONFIG.repo),
-        'CONFIG.repo starts with "quay.io/": ' + CONFIG.repo);
+} catch (e) {
+    CONFIG = null;
+    log.warn(e, 'skipping v2 jfrog artifactory tests: ' +
+        'could not load "v2jfrogartifactory" key from test/config.json');
+    console.warn('# warning: skipping v2 jfrog artifactory tests: %s',
+        e.message);
 }
-
-
-// Trent will report these to "support@quay.io" and jzelinskie on #quay IRC
-var SKIP_QUAY_IO_BUGLETS = true;
 
 
 // --- Tests
 
 if (CONFIG)
-test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
+test('v2 jfrog artifactory private repo (' + CONFIG.repo + ')', function (tt) {
     var client;
     var repo = drc.parseRepo(CONFIG.repo);
 
@@ -89,14 +88,15 @@ test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
 
     tt.test('  ping', function (t) {
         client.ping(function (err, body, res) {
-            t.ok(err);
+            // With JFrog Artifactory, we actually get a successful ping,
+            // because (I guess) only basic auth is required here.
+            t.ifErr(err);
             t.ok(res, 'have a response');
             if (res) {
-                t.equal(res.statusCode, 401);
-                t.ok(res.headers['www-authenticate']);
+                t.equal(res.statusCode, 200);
+                t.equal(res.headers['docker-distribution-api-version'],
+                    'registry/2.0');
             }
-            t.equal(res.headers['docker-distribution-api-version'],
-                'registry/2.0');
             t.end();
         });
     });
@@ -184,24 +184,14 @@ test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
             var first = ress[0];
             t.ok(first.statusCode === 200 || first.statusCode === 307);
             t.equal(first.headers['docker-content-digest'], digest);
-
-            // Docker-Distribution-Api-Version header:
-            // docker.io includes this header here, quay.io does not.
-            // t.equal(first.headers['docker-distribution-api-version'],
-            //    'registry/2.0');
+            t.equal(first.headers['docker-distribution-api-version'],
+               'registry/2.0');
 
             var last = ress[ress.length - 1];
             t.ok(last);
             t.equal(last.statusCode, 200);
-
-            // Content-Type:
-            // - docker.io gives 'application/octet-stream', which is what
-            //   I'd expect for the GET response at least.
-            // - quay.io current v2 support gives: 'text/html; charset=utf-8'
-            if (!SKIP_QUAY_IO_BUGLETS) {
-                t.equal(last.headers['content-type'],
-                    'application/octet-stream');
-            }
+            t.equal(last.headers['content-type'],
+                'application/octet-stream');
 
             t.ok(last.headers['content-length']);
             t.end();
@@ -214,17 +204,16 @@ test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
             t.ok(ress);
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
-            // var res = ress[0];
+            var res = ress[0];
 
-            // statusCode:
-            // - docker.io gives 404, which is what I'd expect
-            // - quay.io gives 405 (Method Not Allowed). Hrm.
+            // statusCode: docker.io gives 404, which is what I'd expect
+            //
             // The spec doesn't specify:
             // https://docs.docker.com/registry/spec/api/#existing-layers
-            // t.equal(res.statusCode, 404);
+            t.equal(res.statusCode, 404);
 
             // Docker-Distribution-Api-Version header:
-            // docker.io includes this header here, quay.io does not.
+            // docker.io includes this header here, artifactory does not.
             // t.equal(res.headers['docker-distribution-api-version'],
             //    'registry/2.0');
 
@@ -248,21 +237,14 @@ test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
                 'first request status code 200, 302 or 307: statusCode=' +
                 first.statusCode);
             t.equal(first.headers['docker-content-digest'], digest);
-
-            // Docker-Distribution-Api-Version header:
-            // docker.io includes this header here, quay.io does not.
-            // t.equal(first.headers['docker-distribution-api-version'],
-            //    'registry/2.0');
+            t.equal(first.headers['docker-distribution-api-version'],
+               'registry/2.0');
 
             t.ok(stream);
             t.equal(stream.statusCode, 200);
 
-            // Quay.io gives `Content-Type: binary/octet-stream` which has to
-            // be a bug. AFAIK that isn't a real MIME type.
-            if (!SKIP_QUAY_IO_BUGLETS) {
-                t.equal(stream.headers['content-type'],
-                    'application/octet-stream');
-            }
+            t.equal(stream.headers['content-type'],
+                'application/octet-stream');
 
             t.ok(stream.headers['content-length']);
 
@@ -288,17 +270,17 @@ test('v2 quay.io private repo (' + CONFIG.repo + ')', function (tt) {
             t.ok(ress);
             t.ok(Array.isArray(ress));
             t.equal(ress.length, 1);
-            // var res = ress[0];
+            var res = ress[0];
 
             // statusCode:
             // - docker.io gives 404, which is what I'd expect
-            // - quay.io gives 405 (Method Not Allowed). Hrm.
+            //
             // The spec doesn't specify:
             // https://docs.docker.com/registry/spec/api/#existing-layers
-            // t.equal(res.statusCode, 404);
+            t.equal(res.statusCode, 404);
 
             // Docker-Distribution-Api-Version header:
-            // docker.io includes this header here, quay.io does not.
+            // docker.io includes this header here, artifactory does not.
             // t.equal(res.headers['docker-distribution-api-version'],
             //    'registry/2.0');
 

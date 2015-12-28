@@ -2,7 +2,10 @@
 
 ## 3.0.4 (not yet released)
 
-(nothing yet)
+- Add tests for v2 Docker API using jfrog's Artifactory.
+  (Peripherally related to DOCKER-640.)
+- Fix my config error that made me think the v2.quayioprivate tests
+  were failing. Re-enable that test in `make test`.
 
 
 ## 3.0.3

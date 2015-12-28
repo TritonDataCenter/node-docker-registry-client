@@ -15,7 +15,7 @@
  * This requires a test/config.json something like this:
  *
  *      {
- *          "jfrogartifactory": {
+ *          "v1jfrogartifactory": {
  *              "repo": "trentm.artifactoryonline.com/busybox",
  *              "username": "admin",
  *              "password": "(your password)",
@@ -40,8 +40,8 @@ var drc = require('..');
 var log = require('./lib/log');
 var CONFIG;
 try {
-    CONFIG = require(__dirname + '/config.json').jfrogartifactory;
-    assert.object(CONFIG, 'config.json#jfrogartifactory');
+    CONFIG = require(__dirname + '/config.json').v1jfrogartifactory;
+    assert.object(CONFIG, 'config.json#v1jfrogartifactory');
     assert.string(CONFIG.repo, 'CONFIG.repo');
     assert.string(CONFIG.username, 'CONFIG.username');
     assert.string(CONFIG.password, 'CONFIG.password');
@@ -49,9 +49,9 @@ try {
     assert.string(CONFIG.searchTerm, 'CONFIG.searchTerm');
 } catch (e) {
     CONFIG = null;
-    log.warn(e, 'skipping jfrog artifactory tests: ' +
-        'could not load "jfrogartifactory" key from test/config.json');
-    console.warn('# warning: skipping jfrog artifactory tests: %s',
+    log.warn(e, 'skipping v1 jfrog artifactory tests: ' +
+        'could not load "v1jfrogartifactory" key from test/config.json');
+    console.warn('# warning: skipping v1 jfrog artifactory tests: %s',
         e.message);
 }
 
