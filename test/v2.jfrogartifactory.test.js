@@ -120,6 +120,45 @@ test('v2 jfrog artifactory private repo (' + CONFIG.repo + ')', function (tt) {
     });
 
     /*
+     * IMGAPI's docker pull will attempt to figure out if a registry is
+     * private, i.e. *requires auth*. It'll do that by trying to get starter
+     * info *without* auth info. Ensure that doesn't blow up.
+     */
+    var noAuthClient;
+    tt.test('  noAuthClient: setup', function (t) {
+        noAuthClient = drc.createClientV2({
+            name: CONFIG.repo,
+            log: log
+        });
+        t.ok(noAuthClient);
+        t.end();
+    });
+    tt.test('  noAuthClient: ping', function (t) {
+        noAuthClient.ping(function (err, body, res) {
+            t.ok(err, 'expect an auth error');
+            t.ok(res, 'have a response');
+            if (res) {
+                t.equal(res.statusCode, 401);
+                t.ok(res.headers['www-authenticate']);
+                t.equal(res.headers['docker-distribution-api-version'],
+                    'registry/2.0');
+            }
+            t.end();
+        });
+    });
+    tt.test('  noAuthClient: getManifest', function (t) {
+        noAuthClient.getManifest({ref: CONFIG.tag},
+                function (err, manifest_, res) {
+            t.ok(err, 'expect an auth error');
+            t.end();
+        });
+    });
+    tt.test('  noAuthClient: close', function (t) {
+        noAuthClient.close();
+        t.end();
+    });
+
+    /*
      *  {
      *      "name": <name>,
      *      "tag": <tag>,

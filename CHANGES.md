@@ -2,8 +2,14 @@
 
 ## 3.0.4 (not yet released)
 
-- Add tests for v2 Docker API using jfrog's Artifactory.
-  (Peripherally related to DOCKER-640.)
+- DOCKER-640: Fix assertion hit when attempting `getManifest` (or other v2 API
+  endpoints) against a v2 Docker Registry that uses Basic auth **but when not
+  passing auth info.**
+
+  Triton's IMGAPI currently does the latter as part of a `docker pull` to
+  determine if the repo is private. See
+  <https://github.com/joyent/sdc-imgapi/blob/f5384db7ddc4e1ef9a54f6e6fbe15d11093e3155/lib/images.js#L3378-L3448>.
+
 - Fix my config error that made me think the v2.quayioprivate tests
   were failing. Re-enable that test in `make test`.
 
