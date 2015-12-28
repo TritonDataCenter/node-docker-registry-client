@@ -152,7 +152,7 @@ def cutarelease(project_name, version_files, dry_run=False):
         f = codecs.open(changes_path, 'w', 'utf-8')
         f.write(changes_txt)
         f.close()
-        run('git commit %s -m "prepare for %s release"'
+        run('git commit %s -m "%s"'
             % (changes_path, version))
 
     # Tag version and push.
@@ -248,7 +248,7 @@ def cutarelease(project_name, version_files, dry_run=False):
             f.close()
 
     if not dry_run:
-        run('git commit %s %s -m "prep for future dev"' % (
+        run('git commit %s %s -m "bumpver for subsequent work"' % (
             changes_path, ' '.join(version_files)))
         run('git push')
 
