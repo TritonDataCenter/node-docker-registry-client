@@ -47,6 +47,8 @@ test: | $(TAPE)
 clean::
 	rm -f *.layer examples/*.layer docker-registry-client-*.tgz
 
+DISTCLEAN_FILES += node_modules
+
 # Ensure CHANGES.md and package.json have the same version.
 .PHONY: versioncheck
 versioncheck:
