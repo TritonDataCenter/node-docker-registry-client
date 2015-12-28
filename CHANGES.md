@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.0.5 (not yet released)
+
+(nothing yet)
+
+
 ## 3.0.4
 
 - DOCKER-640: Fix assertion hit when attempting `getManifest` (or other v2 API
