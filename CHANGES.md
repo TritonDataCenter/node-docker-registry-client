@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.0.5 (not yet released)
+## 3.0.5
 
 - DOCKER-643: RegistryClientV2 doesn't pass `insecure` flag to `ping()`
   function properly.
