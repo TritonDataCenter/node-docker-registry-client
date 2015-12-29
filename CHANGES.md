@@ -2,7 +2,8 @@
 
 ## 3.0.5 (not yet released)
 
-(nothing yet)
+- DOCKER-643: RegistryClientV2 doesn't pass `insecure` flag to `ping()`
+  function properly.
 
 
 ## 3.0.4
