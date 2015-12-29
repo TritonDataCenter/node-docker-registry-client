@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.1.0 (not yet released)
+## 3.1.0
 
 - [pull #6, plus some additions] Allow one to ping a v2 registry using bearer
   token auth. Typically one shouldn't need to login for the ping endpoint,
