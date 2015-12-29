@@ -1,8 +1,50 @@
 # node-docker-registry-client Changelog
 
-## 3.0.6 (not yet released)
+## 3.1.0 (not yet released)
 
-(nothing yet)
+- [pull #6, plus some additions] Allow one to ping a v2 registry using bearer
+  token auth. Typically one shouldn't need to login for the ping endpoint,
+  because the point is to check for 404 (doesn't support v2) or not (supports
+  v2). However, there is no good reason one shouldn't be able to ping it
+  with auth.
+
+  This adds `RegistryClientV2.prototype.login()` and the top-level `pingV2()`
+  accepts a `opts.authInfo` as returned by `loginV2()`.
+
+  Sample code doing this:
+
+        var drc = require('docker-registry-client');
+        var bunyan = require('bunyan');
+
+        var log = bunyan.createLogger({name: 'pingplay', level: 'trace'});
+        var client = drc.createClientV2({
+            name: 'docker.io',
+            log: log,
+            username: 'MY-USERNAME',
+            password: 'MY-PASSWORD'
+        });
+
+        client.ping(function(err, body, res) {
+            if (!err) {
+                console.log('Success on first try');
+            } else if (err.statusCode === 401) {
+                client.login({
+                    pingErr: err,
+                    pingRes: res
+                }, function(err, result) {
+                    client.ping(function(err, body, res) {
+                        if (!err) {
+                            console.log('Success');
+                        } else {
+                            console.log('Fail:', err);
+                        }
+                    });
+                });
+            } else {
+                console.log('Huh?', err);
+            }
+        });
+
 
 
 ## 3.0.5
