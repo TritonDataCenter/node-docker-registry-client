@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.1.1 (not yet released)
+
+(nothing yet)
+
+
 ## 3.1.0
 
 - [pull #6, plus some additions] Allow one to ping a v2 registry using bearer
