@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.1.2 (not yet released)
+
+(nothing yet)
+
+
 ## 3.1.1
 
 - IMGAPI-542: Don't *require* the Docker-Content-Digest header on v2 GetBlob
