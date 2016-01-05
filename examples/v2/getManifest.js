@@ -41,9 +41,9 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         if (err) {
             mainline.fail(cmd, err, opts);
         }
-        console.log('# response headers');
-        console.log(JSON.stringify(res.headers, null, 4));
-        console.log('# manifest');
+        console.error('# response headers');
+        console.error(JSON.stringify(res.headers, null, 4));
+        console.error('# manifest');
         console.log(JSON.stringify(manifest, null, 4));
     });
 });

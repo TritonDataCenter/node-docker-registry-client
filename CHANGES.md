@@ -2,7 +2,9 @@
 
 ## 3.1.1 (not yet released)
 
-(nothing yet)
+- IMGAPI-542: Don't *require* the Docker-Content-Digest header on v2 GetBlob
+  server responses: `RegistryClientV2.prototype.createBlobReadStream`. Also
+  don't throw if can't parse an existing Docker-Content-Digest header.
 
 
 ## 3.1.0
