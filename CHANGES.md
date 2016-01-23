@@ -2,7 +2,7 @@
 
 ## 3.1.2 (not yet released)
 
-(nothing yet)
+- IMGAPI-546: 'docker pull nope.example.com/nope' throws exception in IMGAPI
 
 
 ## 3.1.1
