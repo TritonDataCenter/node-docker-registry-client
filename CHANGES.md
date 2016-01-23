@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.1.3 (not yet released)
+
+(nothing yet)
+
+
 ## 3.1.2
 
 - IMGAPI-546: 'docker pull nope.example.com/nope' throws exception in IMGAPI
