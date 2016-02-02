@@ -2,7 +2,8 @@
 
 ## 3.1.3 (not yet released)
 
-(nothing yet)
+- DOCKER-689 Don't overwrite `err.body` for an HTTP response error that doesn't have
+  a JSON body.
 
 
 ## 3.1.2
