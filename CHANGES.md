@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.1.3 (not yet released)
+## 3.1.3
 
 - DOCKER-689 Don't overwrite `err.body` for an HTTP response error that doesn't have
   a JSON body.
