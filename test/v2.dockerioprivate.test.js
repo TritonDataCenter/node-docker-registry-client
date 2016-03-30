@@ -211,7 +211,9 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             var last = ress[ress.length - 1];
             t.ok(last);
             t.equal(last.statusCode, 200);
-            t.equal(last.headers['content-type'], 'application/octet-stream');
+            var contentType = last.headers['content-type'];
+            t.ok(['application/octet-stream', 'application/x-gzip']
+                .indexOf(contentType), 'expected content-type: ' + contentType);
             t.ok(last.headers['content-length']);
             t.end();
         });
