@@ -7,25 +7,34 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016, Joyent, Inc.
  */
 
+/* BEGIN JSSTYLED */
 /*
  * Login to a Docker Registry (whether it is v1 or v2).
  *
+ * There is a catch with supposed v1 support: In Docker 1.11 (Docker Remote API
+ * version 1.23) they dropped including the "email" field in the "POST /auth"
+ * request to the Docker Engine. This script will not prompt for email if
+ * not given as an argument -- and then won't work against a v1 registry.
+ * Basically: v1 is getting phased out.
+ *
  * Usage:
- *      node examples/login.js [INDEX-NAME]
+ *      node examples/login.js [INDEX-NAME] [USERNAME] [PASSWORD] [EMAIL]
  *
  * Run with TRACE=1 envvar to get trace-level logging.
  *
  * Example:
+ *      # If not given, INDEX-NAME defaults to the appropriate Docker Hub
+ *      # index URL.
  *      $ node examples/login.js
  *      Username: bob
  *      Password:
- *      Email: bob@example.com
  *
- *      Wrong login/password, please try again
+ *      login: error: token auth attempt for https://index.docker.io/v1/: https://auth.docker.io/token?service=registry.docker.io&account=bob request failed with status 401: {"details":"incorrect username or password"}
  */
+/* END JSSTYLED */
 
 var bunyan = require('bunyan');
 var format = require('util').format;
@@ -99,19 +108,6 @@ vasync.pipeline({funcs: [
             next();
         });
     },
-    function getEmail(_, next) {
-        if (email) {
-            return next();
-        }
-        read({prompt: 'Email:'}, function (err, val) {
-            if (err) {
-                return next(err);
-            }
-            email = val.trim();
-            console.log();
-            next();
-        });
-    },
     function doLogin(_, next) {
         drc.login({
             indexName: indexName,
@@ -119,8 +115,8 @@ vasync.pipeline({funcs: [
             // TODO: insecure: insecure,
             // auth info:
             username: username,
-            email: email,
-            password: password
+            password: password,
+            email: email
         }, function (err, result) {
             if (err) {
                 next(err);

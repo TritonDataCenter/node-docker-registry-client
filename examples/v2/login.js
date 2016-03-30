@@ -7,9 +7,10 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016 Joyent, Inc.
  */
 
+/* BEGIN JSSTYLED */
 /*
  * This shows roughly how a Docker Engine would handle the server-side of
  * a "check auth" Remote API request:
@@ -18,7 +19,7 @@
  * to a *v2* Docker Registry API -- as is called by `docker login`.
  *
  * Usage:
- *      node examples/login.js [INDEX-NAME]
+ *      node examples/login.js [INDEX-NAME] [USERNAME] [PASSWORD]
  *
  * Run with TRACE=1 envvar to get trace-level logging.
  *
@@ -26,10 +27,10 @@
  *      $ node examples/login.js
  *      Username: bob
  *      Password:
- *      Email: bob@example.com
  *
- *      Wrong login/password, please try again
+ *      login: error: token auth attempt for https://index.docker.io/v1/: https://auth.docker.io/token?service=registry.docker.io&account=bob request failed with status 401: {"details":"incorrect username or password"}
  */
+/* END JSSTYLED */
 
 var bunyan = require('bunyan');
 var format = require('util').format;
@@ -71,13 +72,12 @@ var log = bunyan.createLogger({
 var indexName = process.argv[2] || 'https://index.docker.io/v1/';
 if (indexName === '-h' || indexName === '--help') {
     console.error('usage: node examples/v2/%s.js [INDEX] [USERNAME] ' +
-        '[PASSWORD] [EMAIL]', cmd);
+        '[PASSWORD]', cmd);
     process.exit(2);
 }
 
 var username = process.argv[3];
 var password = process.argv[4];
-var email = process.argv[5];
 vasync.pipeline({funcs: [
     function getUsername(_, next) {
         if (username) {
@@ -103,19 +103,6 @@ vasync.pipeline({funcs: [
             next();
         });
     },
-    function getEmail(_, next) {
-        if (email) {
-            return next();
-        }
-        read({prompt: 'Email:'}, function (err, val) {
-            if (err) {
-                return next(err);
-            }
-            email = val.trim();
-            console.log();
-            next();
-        });
-    },
     function doLogin(_, next) {
         drc.loginV2({
             indexName: indexName,
@@ -123,7 +110,6 @@ vasync.pipeline({funcs: [
             // TODO: insecure: insecure,
             // auth info:
             username: username,
-            email: email,
             password: password
         }, function (err, result) {
             if (err) {

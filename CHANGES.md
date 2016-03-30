@@ -2,7 +2,9 @@
 
 ## 3.1.4 (not yet released)
 
-(nothing yet)
+- DOCKER-764: As of Docker 1.11, `docker login` will no longer prompt for an
+  email (docker/docker#20565). This updates `drc.login()` to no blow up
+  attempting to do v1 login if an email is not provided.
 
 
 ## 3.1.3
