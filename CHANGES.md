@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.1.5 (not yet released)
+
+(nothing yet)
+
+
 ## 3.1.4
 
 - DOCKER-764: As of Docker 1.11, `docker login` will no longer prompt for an
