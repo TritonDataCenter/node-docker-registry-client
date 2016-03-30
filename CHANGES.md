@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.1.4 (not yet released)
+## 3.1.4
 
 - DOCKER-764: As of Docker 1.11, `docker login` will no longer prompt for an
   email (docker/docker#20565). This updates `drc.login()` to no blow up
