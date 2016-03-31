@@ -1,5 +1,10 @@
 # node-docker-registry-client Changelog
 
+## 3.1.6 (not yet released)
+
+(nothing yet)
+
+
 ## 3.1.5
 
 - DOCKER-772: Change `pingV2` to `callback(err)` rather than `throw err` if
