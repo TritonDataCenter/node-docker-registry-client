@@ -2,7 +2,8 @@
 
 ## 3.1.5 (not yet released)
 
-(nothing yet)
+- DOCKER-772: Change `pingV2` to `callback(err)` rather than `throw err` if
+  the given `opts.indexName` is invalid.
 
 
 ## 3.1.4
