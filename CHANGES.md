@@ -1,6 +1,6 @@
 # node-docker-registry-client Changelog
 
-## 3.1.5 (not yet released)
+## 3.1.5
 
 - DOCKER-772: Change `pingV2` to `callback(err)` rather than `throw err` if
   the given `opts.indexName` is invalid.
