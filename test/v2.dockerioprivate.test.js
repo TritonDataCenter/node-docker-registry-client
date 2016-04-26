@@ -200,20 +200,26 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     tt.test('  headBlob', function (t) {
         var digest = manifest.fsLayers[0].blobSum;
         client.headBlob({digest: digest}, function (err, ress) {
-            t.ifErr(err);
-            t.ok(ress);
-            t.ok(Array.isArray(ress));
+            t.ifErr(err, 'no headBlob err');
+            t.ok(ress, 'got a "ress"');
+            t.ok(Array.isArray(ress), '"ress" is an array');
             var first = ress[0];
-            t.ok(first.statusCode === 200 || first.statusCode === 307);
-            t.equal(first.headers['docker-content-digest'], digest);
+            t.ok(first.statusCode === 200 || first.statusCode === 307,
+                'first response statusCode is 200 or 307');
+            if (first.headers['docker-content-digest']) {
+                t.equal(first.headers['docker-content-digest'], digest,
+                    '"docker-content-digest" header from first response is '
+                    + 'the queried digest');
+            }
             t.equal(first.headers['docker-distribution-api-version'],
-                'registry/2.0');
+                'registry/2.0',
+                '"docker-distribution-api-version" header is "registry/2.0"');
             var last = ress[ress.length - 1];
-            t.ok(last);
-            t.equal(last.statusCode, 200);
+            t.equal(last.statusCode, 200, 'last response statusCode is 200');
             var contentType = last.headers['content-type'];
             t.ok(['application/octet-stream', 'application/x-gzip']
-                .indexOf(contentType), 'expected content-type: ' + contentType);
+                .indexOf(contentType) !== -1,
+                'content-type is as expected, got ' + contentType);
             t.ok(last.headers['content-length']);
             t.end();
         });
@@ -237,20 +243,28 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
         var digest = manifest.fsLayers[0].blobSum;
         client.createBlobReadStream({digest: digest},
                 function (err, stream, ress) {
-            t.ifErr(err);
+            t.ifErr(err, 'createBlobReadStream err');
 
-            t.ok(ress);
-            t.ok(Array.isArray(ress));
+            t.ok(ress, 'got responses');
+            t.ok(Array.isArray(ress), 'ress is an array');
             var first = ress[0];
-            t.ok(first.statusCode === 200 || first.statusCode === 307);
-            t.equal(first.headers['docker-content-digest'], digest);
+            t.ok(first.statusCode === 200 || first.statusCode === 307,
+                'createBlobReadStream first res statusCode is 200 or 307');
+            if (first.headers['docker-content-digest']) {
+                t.equal(first.headers['docker-content-digest'], digest,
+                    '"docker-content-digest" header from first response is '
+                    + 'the queried digest');
+            }
             t.equal(first.headers['docker-distribution-api-version'],
-                'registry/2.0');
+                'registry/2.0',
+                '"docker-distribution-api-version" header is "registry/2.0"');
 
-            t.ok(stream);
-            t.equal(stream.statusCode, 200);
+            t.ok(stream, 'got a stream');
+            t.equal(stream.statusCode, 200, 'stream statusCode is 200');
             t.equal(stream.headers['content-type'], 'application/octet-stream');
-            t.ok(stream.headers['content-length']);
+            t.ok(stream.headers['content-length'] !== undefined,
+                'got a "content-length" header');
+
 
             var numBytes = 0;
             var hash = crypto.createHash(digest.split(':')[0]);

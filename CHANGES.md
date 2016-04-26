@@ -2,7 +2,7 @@
 
 ## 3.1.6 (not yet released)
 
-(nothing yet)
+- #7 Fix test suite against Docker Hub.
 
 
 ## 3.1.5
