@@ -422,5 +422,11 @@ test('parseIndex', function (t) {
     t.throws(function () { parseIndex('docker.io/foo'); },
         /invalid/);
 
+    // Test special casing for this URL passed from 'docker login' by default.
+    t.deepEqual(parseIndex('https://index.docker.io/v1/'), {
+        'name': 'docker.io',
+        'official': true
+    });
+
     t.end();
 });

@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016 Joyent, Inc.
  */
 
 var assert = require('assert-plus');
@@ -32,7 +32,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     var rat = drc.parseRepoAndRef(name);
     assert.ok(rat.digest, 'must specify a @DIGEST');
     var client = drc.createClientV2({
-        name: rat.localName,
+        repo: rat,
         log: log,
         insecure: opts.insecure,
         username: opts.username,

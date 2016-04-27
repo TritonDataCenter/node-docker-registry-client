@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016 Joyent, Inc.
  */
 
 var assert = require('assert-plus');
@@ -29,26 +29,25 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     }
 
     // The interesting stuff starts here.
-    var rat = drc.parseRepoAndRef(args[0]);
-    assert.ok(rat.digest, 'must specify a @DIGEST');
-    console.log('Repo:', rat.canonicalName);
+    var rar = drc.parseRepoAndRef(args[0]);
+    assert.ok(rar.digest, 'must specify a @DIGEST');
+    console.log('Repo:', rar.canonicalName);
 
     var client = drc.createClientV2({
-        scheme: rat.index.scheme,
-        name: rat.canonicalName,
+        repo: rar,
         log: log,
         insecure: opts.insecure,
         username: opts.username,
         password: opts.password
     });
 
-    client.createBlobReadStream({digest: rat.digest},
+    client.createBlobReadStream({digest: rar.digest},
             function (createErr, stream, ress) {
         if (createErr) {
             mainline.fail(cmd, createErr, opts);
         }
 
-        var filename = rat.digest.split(':')[1].slice(0, 12) + '.blob';
+        var filename = rar.digest.split(':')[1].slice(0, 12) + '.blob';
         console.log('Downloading blob to "%s".', filename);
         console.log('Response headers:');
         console.log(JSON.stringify(ress[0].headers, null, 4));

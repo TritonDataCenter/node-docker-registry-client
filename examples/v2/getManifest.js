@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016 Joyent, Inc.
  */
 
 var drc = require('../../');
@@ -27,15 +27,15 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
 
     // The interesting stuff starts here.
-    var rat = drc.parseRepoAndRef(name);
+    var rar = drc.parseRepoAndRef(name);
     var client = drc.createClientV2({
-        name: rat.localName,
+        repo: rar,
         log: log,
         insecure: opts.insecure,
         username: opts.username,
         password: opts.password
     });
-    client.getManifest({ref: rat.tag || rat.digest},
+    client.getManifest({ref: rar.tag || rar.digest},
             function (err, manifest, res) {
         client.close();
         if (err) {

@@ -2,6 +2,7 @@
 
 ## 3.1.6 (not yet released)
 
+- #8 Fix usage against a *http* registry.
 - #7 Fix test suite against Docker Hub.
 
 

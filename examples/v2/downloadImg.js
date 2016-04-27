@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright 2016 Joyent, Inc.
  */
 
 /*
@@ -43,11 +43,10 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     }
 
     // The interesting stuff starts here.
-    var rat = drc.parseRepoAndRef(args[0]);
-    console.log('Repo:', rat.canonicalName);
+    var rar = drc.parseRepoAndRef(args[0]);
+    console.log('Repo:', rar.canonicalName);
     var client = drc.createClientV2({
-        scheme: rat.index.scheme,
-        name: rat.canonicalName,
+        repo: rar,
         log: log,
         insecure: opts.insecure,
         username: opts.username,
@@ -64,12 +63,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
 
     var manifest;
     var digest;
-    var slug = rat.localName.replace(/[^\w]+/g, '-') + '-' +
-        (rat.tag ? rat.tag : rat.digest.slice(0, 12));
+    var slug = rar.localName.replace(/[^\w]+/g, '-') + '-' +
+        (rar.tag ? rar.tag : rar.digest.slice(0, 12));
 
     vasync.pipeline({funcs: [
         function getTheManifest(_, next) {
-            var ref = rat.tag || rat.digest;
+            var ref = rar.tag || rar.digest;
             client.getManifest({ref: ref}, function (err, manifest_, res) {
                 if (err) {
                     next(err);
@@ -114,7 +113,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
                     barTimeout = setTimeout(function () {
                         bar = new progbar.ProgressBar({
                             filename: format('%s %d layers',
-                                rat.localName, manifest.fsLayers.length),
+                                rar.localName, manifest.fsLayers.length),
                             size: cLens.reduce(function (a, b) { return a+b; })
                         });
                         bar.advance(numBytes); // starter value
