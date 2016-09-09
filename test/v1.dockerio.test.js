@@ -65,7 +65,9 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    var tag = 'latest';
+    // Note: 'latest' is no longer available in docker.io, use '2.7' which is
+    //       still available and in the v1 registry format.
+    var tag = '2.7';
     var repoTags;
 
     tt.test('  listRepoTags', function (t) {

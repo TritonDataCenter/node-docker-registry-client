@@ -23,6 +23,15 @@ var REPO = 'busybox';
 var TAG = 'latest';
 
 
+// --- Helper functions.
+
+function getFirstLayerDigestFromManifest(manifest_) {
+    if (manifest_.schemaVersion === 1) {
+        return manifest_.fsLayers[0].blobSum;
+    }
+    return manifest_.layers[0].digest;
+}
+
 
 // --- Tests
 
@@ -83,34 +92,71 @@ test('v2 docker.io', function (tt) {
      *      "signature": <JWS>
      *  }
      */
-    var manifest;
-    var manifestDigest;
-    tt.test('  getManifest', function (t) {
+    tt.test('  getManifest (v2.1)', function (t) {
         client.getManifest({ref: TAG}, function (err, manifest_, res) {
             t.ifErr(err);
-            manifest = manifest_;
-            manifestDigest = res.headers['docker-content-digest'];
-            t.ok(manifest);
-            t.equal(manifest.schemaVersion, 1);
-            t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, TAG);
-            t.ok(manifest.architecture);
-            t.ok(manifest.fsLayers);
-            t.ok(manifest.history[0].v1Compatibility);
-            t.ok(manifest.signatures[0].signature);
+            t.ok(manifest_);
+            t.equal(manifest_.schemaVersion, 1);
+            t.equal(manifest_.name, repo.remoteName);
+            t.equal(manifest_.tag, TAG);
+            t.ok(manifest_.architecture);
+            t.ok(manifest_.fsLayers);
+            t.ok(manifest_.history[0].v1Compatibility);
+            t.ok(manifest_.signatures[0].signature);
             t.end();
         });
     });
 
+    /*
+     * {
+     *   "schemaVersion": 2,
+     *   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+     *   "config": {
+     *     "mediaType": "application/octet-stream",
+     *     "size": 1459,
+     *     "digest": "sha256:2b8fd9751c4c0f5dd266fc...01"
+     *   },
+     *   "layers": [
+     *     {
+     *       "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     *       "size": 667590,
+     *       "digest": "sha256:8ddc19f16526912237dd8af...a9"
+     *     }
+     *   ]
+     * }
+     */
+    var manifest;
+    var manifestDigest;
+    tt.test('  getManifest (v2.2)', function (t) {
+        var getOpts = {ref: TAG, maxSchemaVersion: 2};
+        client.getManifest(getOpts, function (err, manifest_, res) {
+            t.ifErr(err);
+            manifest = manifest_;
+            manifestDigest = res.headers['docker-content-digest'];
+            t.ok(manifest);
+            t.equal(manifest.schemaVersion, 2);
+            t.ok(manifest.config);
+            t.ok(manifest.config.digest, manifest.config.digest);
+            t.ok(manifest.layers);
+            t.ok(manifest.layers.length > 0);
+            t.ok(manifest.layers[0].digest);
+            t.end();
+        });
+    });
+
+    /*
+     * Note this test requires that the manifest be pulled in the v2.2 format,
+     * otherwise you will get a manifest not found error.
+     */
     tt.test('  getManifest (by digest)', function (t) {
-        client.getManifest({ref: manifestDigest}, function (err, manifest_) {
+        var getOpts = {ref: manifestDigest, maxSchemaVersion: 2};
+        client.getManifest(getOpts, function (err, manifest_) {
             t.ifErr(err);
             t.ok(manifest);
             ['schemaVersion',
-             'name',
-             'tag',
-             'architecture'].forEach(function (k) {
-                t.equal(manifest_[k], manifest[k], k);
+             'config',
+             'layers'].forEach(function (k) {
+                t.deepEqual(manifest_[k], manifest[k], k);
             });
             t.end();
         });
@@ -126,7 +172,7 @@ test('v2 docker.io', function (tt) {
     });
 
     tt.test('  headBlob', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = getFirstLayerDigestFromManifest(manifest);
         client.headBlob({digest: digest}, function (err, ress) {
             t.ifErr(err, 'no headBlob err');
             t.ok(ress, 'got a "ress"');
@@ -168,7 +214,7 @@ test('v2 docker.io', function (tt) {
     });
 
     tt.test('  createBlobReadStream', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = getFirstLayerDigestFromManifest(manifest);
         client.createBlobReadStream({digest: digest},
                 function (err, stream, ress) {
             t.ifErr(err, 'createBlobReadStream err');

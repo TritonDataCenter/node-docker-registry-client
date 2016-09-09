@@ -79,9 +79,15 @@ function fail(cmd, err, opts) {
 function mainline(config, cb) {
     assert.string(config.cmd, 'config.cmd');
     assert.optionalBool(config.excludeAuth, 'config.excludeAuth');
+    assert.optionalObject(config.options, 'config.options');
 
+    var dashOpts = (config.excludeAuth ? optionsNoAuth : options);
+    if (config.options) {
+        // Add to existing options.
+        dashOpts = dashOpts.concat(config.options);
+    }
     var parser = dashdash.createParser({
-        options: (config.excludeAuth ? optionsNoAuth : options)
+        options: dashOpts
     });
     try {
         var opts = parser.parse(process.argv);

@@ -1,7 +1,12 @@
 # node-docker-registry-client Changelog
 
-## 3.1.6 (not yet released)
+## 3.2.0 (not yet released)
 
+- DOCKER-929: Support the docker v2.2 manifest format. The `createClientV2` and
+  `getManifest` functions now allow an optional `maxSchemaVersion` argument to
+  allow you to specify the maximum manifest schema version you will receive for
+  getManifest calls. Default is 1 for a schemaVersion 1 format (aka v2.1), a
+  value of 2 means schemaVersion 2 (aka v2.2).
 - #8 Fix usage against a *http* registry.
 - #7 Fix test suite against Docker Hub.
 

@@ -15,7 +15,14 @@ var mainline = require('../mainline');
 
 // Shared mainline with examples/foo.js to get CLI opts.
 var cmd = 'getManifest';
-mainline({cmd: cmd}, function (log, parser, opts, args) {
+var dashOpts = [
+    {
+        names: ['schema', 's'],
+        type: 'number',
+        help: 'Schema version to request (1 or 2, defaults to 1)'
+    }
+];
+mainline({cmd: cmd, options: dashOpts}, function (log, parser, opts, args) {
     var name = args[0];
     if (!name) {
         console.error('usage: node examples/v2/%s.js REPO[:TAG|@DIGEST]\n' +
@@ -35,8 +42,11 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         username: opts.username,
         password: opts.password
     });
-    client.getManifest({ref: rar.tag || rar.digest},
-            function (err, manifest, res) {
+    var getOpts = {
+        ref: rar.tag || rar.digest,
+        maxSchemaVersion: (opts.schema || 1)
+    };
+    client.getManifest(getOpts, function (err, manifest, res) {
         client.close();
         if (err) {
             mainline.fail(cmd, err, opts);
