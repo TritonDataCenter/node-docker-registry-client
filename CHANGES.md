@@ -2,6 +2,7 @@
 
 ## 3.2.0 (not yet released)
 
+- DOCKER-940: Update to support node v4 without build errors.
 - DOCKER-929: Support the docker v2.2 manifest format. The `createClientV2` and
   `getManifest` functions now allow an optional `maxSchemaVersion` argument to
   allow you to specify the maximum manifest schema version you will receive for

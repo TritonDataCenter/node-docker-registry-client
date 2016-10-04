@@ -13,11 +13,11 @@
  */
 
 var bunyan = require('bunyan');
-var restify = require('restify');
+var restifyClients = require('restify-clients');
 
 module.exports = bunyan.createLogger({
     name: 'drc-test',
-    serializers: restify.bunyan.serializers,
+    serializers: restifyClients.bunyan.serializers,
     streams: [
         {
             level: process.env.LOG_LEVEL || (process.env.TRACE && 'trace') ||
