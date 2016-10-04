@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2015, Joyent, Inc.
+# Copyright 2016 Joyent, Inc.
 #
 
 #
@@ -49,11 +49,13 @@ clean::
 
 DISTCLEAN_FILES += node_modules
 
+check:: versioncheck
+
 # Ensure CHANGES.md and package.json have the same version.
 .PHONY: versioncheck
 versioncheck:
 	@echo version is: $(shell cat package.json | json version)
-	[[ `cat package.json | json version` == `grep '^## ' CHANGES.md | head -1 | awk '{print $$2}'` ]]
+	[[ `cat package.json | json version` == `grep '^## ' CHANGES.md | head -2 | tail -1 | awk '{print $$2}'` ]]
 
 .PHONY: cutarelease
 cutarelease: versioncheck

@@ -322,7 +322,38 @@ V1 client usage:
     });
 
 
-## Dev Notes
+## Development
+
+### Naming convensions
 
 For naming this package attempts to consistently use `repo` for repository,
 `img` for image, etc.
+
+
+### Commits
+
+Before commit, ensure that the following checks are clean:
+
+    make prepush
+
+Also see the note at the top that cr.joyent.us is used for code review for
+this repo.
+
+
+### Releases
+
+Changes with possible user impact should:
+
+1. Add a note to the changelog (CHANGES.md).
+2. Bump the package version appropriately.
+3. Once merged to master, the new version should be tagged and published to npm
+   via:
+
+        make cutarelease
+
+   To list to npm accounts that have publish access:
+
+        npm owner ls docker-registry-client
+
+The desire is that users of this package use published versions in their
+package.json `dependencies`, rather than depending on git shas.
