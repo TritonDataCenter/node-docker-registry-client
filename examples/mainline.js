@@ -44,6 +44,11 @@ var options = [
         names: ['insecure', 'k'],
         type: 'bool',
         help: 'Allow insecure SSL connections (i.e. do not enforce SSL certs)'
+    },
+    {
+        names: ['schema', 's'],
+        type: 'number',
+        help: 'Maximum schema version to request (1 or 2, defaults to 1)'
     }
 ];
 
@@ -62,6 +67,11 @@ var optionsNoAuth = [
         names: ['insecure', 'k'],
         type: 'bool',
         help: 'Allow insecure SSL connections (i.e. do not enforce SSL certs)'
+    },
+    {
+        names: ['schema', 's'],
+        type: 'number',
+        help: 'Maximum schema version to request (1 or 2, defaults to 1)'
     }
 ];
 

@@ -29,6 +29,35 @@ var mainline = require('../mainline');
 var PROGRESS = true;
 
 
+/*
+ * Return an array of manifest layers, with each entry containing an iterator
+ * `i` and the layer `digest`, e.g.
+ *   {
+ *       i: 1,
+ *       digest: 'sha256:c1....e7'
+ *   }
+ */
+function getLayersFromManifest(manifest) {
+    var i = 0;
+    if (manifest.schemaVersion === 1) {
+        return manifest.fsLayers.map(function (layer) {
+            i += 1;
+            return {
+                i: i,
+                digest: layer.blobSum
+            };
+        });
+    }
+    assert.equal(manifest.schemaVersion, 2, 'manifest.schemaVersion === 2');
+    return manifest.layers.map(function (layer) {
+        i += 1;
+        return {
+            i: i,
+            digest: layer.digest
+        };
+    });
+}
+
 // Shared mainline with examples/foo.js to get CLI opts.
 var cmd = 'downloadImg';
 mainline({cmd: cmd}, function (log, parser, opts, args) {
@@ -50,7 +79,8 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         log: log,
         insecure: opts.insecure,
         username: opts.username,
-        password: opts.password
+        password: opts.password,
+        maxSchemaVersion: (opts.schema || 1)
     });
 
     // Lazy progress bar. If we have a bar, then need to `bar.log(...)` messages
@@ -93,9 +123,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         },
 
         function downloadLayers(_, next) {
-            for (var i = 0; i < manifest.fsLayers.length; i++) {
-                manifest.fsLayers[i].i = i + 1;
-            }
+            var layers = getLayersFromManifest(manifest);
 
             /*
              * Before setting up a progress bar, we'll wait for the
@@ -108,12 +136,12 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
             function cLenForBar(n) {
                 cLens.push(n);
                 if (PROGRESS && process.stderr.isTTY &&
-                    cLens.length === manifest.fsLayers.length)
+                    cLens.length === layers.length)
                 {
                     barTimeout = setTimeout(function () {
                         bar = new progbar.ProgressBar({
                             filename: format('%s %d layers',
-                                rar.localName, manifest.fsLayers.length),
+                                rar.localName, layers.length),
                             size: cLens.reduce(function (a, b) { return a+b; })
                         });
                         bar.advance(numBytes); // starter value
@@ -122,21 +150,21 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
             }
 
             vasync.forEachParallel({
-                inputs: manifest.fsLayers,
+                inputs: layers,
                 func: function downloadOneLayer(layer, nextLayer_) {
                     var nextLayer = once(nextLayer_);
-                    client.createBlobReadStream({digest: layer.blobSum},
+                    client.createBlobReadStream({digest: layer.digest},
                             function (createErr, stream, ress) {
                         if (createErr) {
                             return nextLayer(createErr);
                         }
                         cLenForBar(Number(stream.headers['content-length']));
                         var filename = format('%s-%d-%s.layer', slug, layer.i,
-                            layer.blobSum.split(':')[1].slice(0, 12));
+                            layer.digest.split(':')[1].slice(0, 12));
                         var fout = fs.createWriteStream(filename);
                         fout.on('finish', function () {
                             msg('Downloaded layer %d of %d: %s',
-                                layer.i, manifest.fsLayers.length, filename);
+                                layer.i, layers.length, filename);
                             nextLayer();
                         });
                         stream.on('error', function (err) {
