@@ -1,6 +1,10 @@
 # node-docker-registry-client Changelog
 
-## not yet released
+## 3.2.3 (not yet released)
+
+## 3.2.2
+
+- DOCKER-950 Docker pull fails on registry that does not use authentication
 
 ## 3.2.1
 
