@@ -1,6 +1,11 @@
 # node-docker-registry-client Changelog
 
-## 3.2.3 (not yet released)
+## not yet released
+
+## 3.2.3
+
+- IMGAPI-596 Move from restify-clients fork to restify-clients@1.4.0 with
+  upstreamed HTTP proxy support.
 
 ## 3.2.2
 
