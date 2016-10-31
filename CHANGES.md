@@ -2,6 +2,11 @@
 
 ## not yet released
 
+## 3.2.4
+
+- DOCKER-959 Unable to pull from registry when registry response sends multiple
+  Docker-Distribution-Api-Version headers.
+
 ## 3.2.3
 
 - IMGAPI-596 Move from restify-clients fork to restify-clients@1.4.0 with

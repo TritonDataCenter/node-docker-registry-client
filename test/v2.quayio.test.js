@@ -20,7 +20,9 @@ var drc = require('..');
 var log = require('./lib/log');
 
 var REPO = 'quay.io/coreos/etcd';
-var TAG = 'latest';
+// Note: Not using TAG='latest' as a workaround for
+// <https://github.com/joyent/node-docker-registry-client/issues/12>.
+var TAG = 'v2.0.0';
 
 // Trent will report these to "support@quay.io" and jzelinskie on #quay IRC
 var SKIP_QUAY_IO_BUGLETS = true;
@@ -76,7 +78,8 @@ test('v2 quay.io', function (tt) {
             t.ifErr(err);
             t.ok(tags);
             t.equal(tags.name, repo.remoteName);
-            t.ok(tags.tags.indexOf(TAG) !== -1, 'no "'+TAG+'" tag');
+            t.ok(tags.tags.indexOf(TAG) !== -1,
+                'tag "'+TAG+'" in listTags:' + JSON.stringify(tags));
             t.end();
         });
     });
