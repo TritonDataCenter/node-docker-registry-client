@@ -13,7 +13,7 @@
         "restify-clients": "^1.4.0",
         "restify-errors": "^3.0.0",
         "strsplit": "1.x",
-        "tough-cookie": "2.0.x",
+        "tough-cookie": "^2.3.0",
         "vasync": "1.x >=1.6.1",
         "verror": "1.x >=1.6.0",
         "www-authenticate": "0.6.x >=0.6.2"
