@@ -59,8 +59,9 @@ test('v1 docker.io', function (tt) {
         client.listRepoImgs(function (err, imgs) {
             t.ifErr(err);
             t.ok(Array.isArray(imgs));
-            t.ok(imgs.length > 0);
-            t.ok(/[0-9a-f]{64}/.test(imgs[0].id));
+            if (imgs.length > 0) {
+                t.ok(/[0-9a-f]{64}/.test(imgs[0].id));
+            }
             t.end();
         });
     });

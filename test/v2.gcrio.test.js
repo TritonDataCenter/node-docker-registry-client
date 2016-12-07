@@ -11,12 +11,14 @@
 var crypto = require('crypto');
 var strsplit = require('strsplit');
 var test = require('tape');
+var util = require('util');
 
 var drc = require('..');
 
 
 // --- globals
 
+var format = util.format;
 var log = require('./lib/log');
 
 var REPO = 'gcr.io/google_containers/pause-amd64';
@@ -113,7 +115,7 @@ test('v2 gcr.io', function (tt) {
     tt.test('  getManifest (by digest)', function (t) {
         client.getManifest({ref: manifestDigest}, function (err, manifest_) {
             t.ifErr(err);
-            t.ok(manifest);
+            t.ok(manifest_);
             ['schemaVersion',
              'name',
              'tag',
@@ -137,15 +139,15 @@ test('v2 gcr.io', function (tt) {
         var digest = manifest.fsLayers[0].blobSum;
         client.headBlob({digest: digest}, function (err, ress) {
             t.ifErr(err);
-            t.ok(ress);
-            t.ok(Array.isArray(ress));
+            t.ok(ress, 'got responses');
+            t.ok(Array.isArray(ress), 'responses is an array');
             var first = ress[0];
 
             // First request statusCode on a redirect:
             // - gcr.io gives 302 (Found)
             // - docker.io gives 307
             t.ok([200, 302, 303, 307].indexOf(first.statusCode) !== -1,
-                'first request status code 200, 302 or 307: statusCode=' +
+                'first response status code 200, 302 or 307: statusCode=' +
                 first.statusCode);
 
             // No digest head is returned (it's using an earlier version of the
@@ -159,13 +161,19 @@ test('v2 gcr.io', function (tt) {
 
             var last = ress[ress.length - 1];
             t.ok(last);
-            t.equal(last.statusCode, 200);
+            t.equal(last.statusCode, 200,
+                'last response status code should be 200');
 
             // Content-Type:
             // - docker.io gives 'application/octet-stream', which is what
             //   I'd expect for the GET response at least.
+            // - However gcr.io, at least for the iamge being tested, now
+            //   returns text/html.
             t.equal(last.headers['content-type'],
-                'application/octet-stream');
+                'text/html',
+                format('expect specific Content-Type on last response; '
+                    + 'statusCode=%s headers=%j',
+                    last.statusCode, last.headers));
 
             t.ok(last.headers['content-length']);
             t.end();

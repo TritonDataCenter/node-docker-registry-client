@@ -2,6 +2,13 @@
 
 ## not yet released
 
+(nothing yet)
+
+## 3.2.5
+
+- DOCKER-983 Change v1 registry session setup to *not* do retries. This allows
+  failing fast when, for example, the registry endpoint URL is bogus.
+
 ## 3.2.4
 
 - DOCKER-959 Unable to pull from registry when registry response sends multiple
