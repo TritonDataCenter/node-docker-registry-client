@@ -4,6 +4,12 @@
 
 (nothing yet)
 
+## 3.2.6
+
+- DOCKER-984 Add a 10s connect timeout for endpoints involved in initial
+  contact with a given Docker registry. This allows faster failing for
+  unreachable hosts.
+
 ## 3.2.5
 
 - DOCKER-983 Change v1 registry session setup to *not* do retries. This allows
