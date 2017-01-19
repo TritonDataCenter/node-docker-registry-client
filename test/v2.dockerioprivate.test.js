@@ -66,6 +66,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             name: CONFIG.repo,
             username: CONFIG.username,
             password: CONFIG.password,
+            maxSchemaVersion: 2,
             log: log
         });
         t.ok(client);
@@ -112,6 +113,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     tt.test('  noAuthClient: setup', function (t) {
         noAuthClient = drc.createClientV2({
             name: CONFIG.repo,
+            maxSchemaVersion: 2,
             log: log
         });
         t.ok(noAuthClient);
@@ -162,11 +164,14 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
      */
     var manifest;
     var manifestDigest;
-    tt.test('  getManifest (v2.1)', function (t) {
-        client.getManifest({ref: CONFIG.tag}, function (err, manifest_, res) {
+    var manifestStr;
+    tt.test('  getManifest', function (t) {
+        client.getManifest({ref: CONFIG.tag},
+                function (err, manifest_, res, manifestStr_) {
             t.ifErr(err);
             manifest = manifest_;
             manifestDigest = res.headers['docker-content-digest'];
+            manifestStr = manifestStr_;
             t.ok(manifest);
             t.equal(manifest.schemaVersion, 2);
             t.ok(manifest.config);
@@ -331,6 +336,41 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             t.equal(res.statusCode, 404);
             t.equal(res.headers['docker-distribution-api-version'],
                 'registry/2.0');
+            t.end();
+        });
+    });
+
+    tt.test('  blobUpload', function (t) {
+        var digest = manifest.layers[0].digest;
+        client.createBlobReadStream({digest: digest},
+                function (err, stream, ress) {
+            t.ifErr(err, 'createBlobReadStream err');
+
+            var last = ress[ress.length - 1];
+            var uploadOpts = {
+                contentLength: parseInt(last.headers['content-length'], 10),
+                digest: digest,
+                stream: stream
+            };
+            client.blobUpload(uploadOpts, function _uploadCb(uploadErr, res) {
+                t.ifErr(uploadErr, 'check blobUpload err');
+                t.equal(res.headers['docker-content-digest'], digest,
+                    'Response header digest should match blob digest');
+                t.end();
+            });
+        });
+    });
+
+    tt.test('  putManifest', function (t) {
+        var uploadOpts = {
+            contentLength: manifestStr.length,
+            manifest: manifestStr,
+            ref: 'test_put_manifest'
+        };
+        client.putManifest(uploadOpts, function _uploadCb(uploadErr, res) {
+            t.ifErr(uploadErr, 'check blobUpload err');
+            t.equal(res.headers['docker-content-digest'], manifestDigest,
+                'Response header digest should match manifest digest');
             t.end();
         });
     });
