@@ -380,7 +380,6 @@ test('v2 amazonecr', function (tt) {
             t.ifErr(uploadErr, 'check blobUpload err');
             //t.equal(res.headers['docker-content-digest'], manifestDigest,
             //    'Response header digest should match manifest digest');
-            console.log('res.headers: ', res.headers);
             t.end();
         });
     });
