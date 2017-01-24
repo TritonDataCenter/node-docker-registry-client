@@ -8,6 +8,16 @@
  * Copyright (c) 2017, Joyent, Inc.
  */
 
+/*
+ * For Google Container Registry private tests, you'll need:
+ *  - the Google Cloud Platform Consol (gcloud) installed
+ *  - a Google Container Registry project configured (i.e. to push to)
+ *  - create the *short-lived* auth config for your gcr.io account
+ *    `gcloud docker -a -s gcr.io`
+ *  - split out username/password from the ~/.docker/config.json
+ */
+
+var assert = require('assert-plus');
 var crypto = require('crypto');
 var test = require('tape');
 var util = require('util');
@@ -20,19 +30,35 @@ var drc = require('..');
 var format = util.format;
 var log = require('./lib/log');
 
-var REPO = 'gcr.io/google_containers/pause-amd64';
-var TAG = '3.0';
+var CONFIG;
+try {
+    CONFIG = require(__dirname + '/config.json').gcrprivate;
+    assert.object(CONFIG, 'config.json#gcrprivate');
+    assert.string(CONFIG.repo, 'CONFIG.repo');
+    assert.string(CONFIG.tag, 'CONFIG.tag');
+    assert.string(CONFIG.username, 'CONFIG.username');
+    assert.string(CONFIG.password, 'CONFIG.password');
+} catch (e) {
+    CONFIG = null;
+    log.warn(e, 'skipping Google Container Registry private tests: ' +
+        'could not load "gcrprivate" key from test/config.json');
+    console.warn('# warning: skipping Google Registry private tests: %s',
+        e.message);
+}
 
 // --- Tests
 
-test('v2 gcr.io', function (tt) {
+if (CONFIG)
+test('v2 gcr.io private', function (tt) {
     var client;
-    var repo = drc.parseRepo(REPO);
+    var repo = drc.parseRepo(CONFIG.repo);
 
     tt.test('  createClient', function (t) {
         client = drc.createClientV2({
-            name: REPO,
+            name: CONFIG.repo,
             maxSchemaVersion: 2,
+            username: CONFIG.username,
+            password: CONFIG.password,
             log: log
         });
         t.ok(client);
@@ -74,40 +100,50 @@ test('v2 gcr.io', function (tt) {
             t.ifErr(err);
             t.ok(tags);
             t.equal(tags.name, repo.remoteName);
-            t.ok(tags.tags.indexOf(TAG) !== -1, 'no "'+TAG+'" tag');
+            t.ok(tags.tags.indexOf(CONFIG.tag) !== -1,
+                'no "'+CONFIG.tag+'" tag');
             t.end();
         });
     });
 
     /*
      *  {
-     *      "name": <name>,
-     *      "tag": <tag>,
-     *      "fsLayers": [
-     *         {
-     *            "blobSum": <tarsum>
-     *         },
-     *         ...
-     *      ],
-     *      "history": <v1 images>,
-     *      "signature": <JWS>
+     *      "schemaVersion": 2,
+     *      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+     *      "config": {
+     *          "mediaType": "application/vnd.docker.container.image.v1+json",
+     *          "size": 1584,
+     *          "digest": "sha256:99e59f495ffaa2...545ab2bbe3b1b1ec3bd0b2"
+     *      },
+     *      "layers": [
+     *          {
+     *              "mediaType": "application/vnd.docker...diff.tar.gzip",
+     *              "size": 32,
+     *              "digest": "sha256:a3ed95caeb02ff...d00e8a7c22955b46d4"
+     *          }
+     *      ]
      *  }
      */
+    var blobDigest;
     var manifest;
     var manifestDigest;
+    var manifestStr;
     tt.test('  getManifest', function (t) {
-        client.getManifest({ref: TAG}, function (err, manifest_, res) {
+        client.getManifest({ref: CONFIG.tag},
+                function (err, manifest_, res, manifestStr_) {
             t.ifErr(err);
             manifest = manifest_;
             manifestDigest = res.headers['docker-content-digest'];
+            t.ok(manifestDigest, 'has a docker-content-digest header');
+            manifestStr = manifestStr_;
             t.ok(manifest);
-            t.equal(manifest.schemaVersion, 1);
-            t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, TAG);
-            t.ok(manifest.architecture);
-            t.ok(manifest.fsLayers);
-            t.ok(manifest.history[0].v1Compatibility);
-            t.ok(manifest.signatures[0].signature);
+            t.equal(manifest.schemaVersion, 2);
+            t.ok(manifest.config);
+            t.ok(manifest.config.digest);
+            t.ok(manifest.layers);
+            t.ok(manifest.layers[0]);
+            t.ok(manifest.layers[0].digest);
+            blobDigest = manifest.layers[0].digest;
             t.end();
         });
     });
@@ -116,11 +152,11 @@ test('v2 gcr.io', function (tt) {
         client.getManifest({ref: manifestDigest}, function (err, manifest_) {
             t.ifErr(err);
             t.ok(manifest_);
-            ['schemaVersion',
-             'name',
-             'tag',
-             'architecture'].forEach(function (k) {
-                t.equal(manifest_[k], manifest[k], k);
+            ['config',
+             'layers',
+             'mediaType',
+             'schemaVersion'].forEach(function (k) {
+                t.deepEqual(manifest_[k], manifest[k], k);
             });
             t.end();
         });
@@ -135,41 +171,8 @@ test('v2 gcr.io', function (tt) {
         });
     });
 
-    tt.test('  getManifest (unknown repo)', function (t) {
-        var badRepoClient = drc.createClientV2({
-            maxSchemaVersion: 2,
-            name: 'unknownreponame',
-            log: log
-        });
-        t.ok(badRepoClient);
-        badRepoClient.getManifest({ref: 'latest'}, function (err, manifest_) {
-            t.ok(err, 'Expected an error on a missing repo');
-            t.notOk(manifest_);
-            t.equal(err.statusCode, 404);
-            t.end();
-        });
-    });
-
-    tt.test('  getManifest (bad username/password)', function (t) {
-        var badUserClient = drc.createClientV2({
-            maxSchemaVersion: 2,
-            name: REPO,
-            username: 'fredNoExistHere',
-            password: 'fredForgot',
-            log: log
-        });
-        t.ok(badUserClient);
-        badUserClient.getManifest({ref: 'latest'}, function (err, manifest_) {
-            t.ok(err, 'Expected an error on a missing repo');
-            t.notOk(manifest_);
-            t.equal(err.statusCode, 401);
-            t.end();
-        });
-    });
-
     tt.test('  headBlob', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
-        client.headBlob({digest: digest}, function (err, ress) {
+        client.headBlob({digest: blobDigest}, function (err, ress) {
             t.ifErr(err);
             t.ok(ress, 'got responses');
             t.ok(Array.isArray(ress), 'responses is an array');
@@ -185,7 +188,7 @@ test('v2 gcr.io', function (tt) {
             // No digest head is returned (it's using an earlier version of the
             // registry API).
             if (first.headers['docker-content-digest']) {
-                t.equal(first.headers['docker-content-digest'], digest);
+                t.equal(first.headers['docker-content-digest'], blobDigest);
             }
 
             t.equal(first.headers['docker-distribution-api-version'],
@@ -237,8 +240,7 @@ test('v2 gcr.io', function (tt) {
     });
 
     tt.test('  createBlobReadStream', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
-        client.createBlobReadStream({digest: digest},
+        client.createBlobReadStream({digest: blobDigest},
                 function (err, stream, ress) {
             t.ifErr(err);
 
@@ -255,7 +257,7 @@ test('v2 gcr.io', function (tt) {
             // No digest head is returned (it's using an earlier version of the
             // registry API).
             if (first.headers['docker-content-digest']) {
-                t.equal(first.headers['docker-content-digest'], digest);
+                t.equal(first.headers['docker-content-digest'], blobDigest);
             }
 
             // Docker-Distribution-Api-Version header:
@@ -265,26 +267,18 @@ test('v2 gcr.io', function (tt) {
 
             t.ok(stream);
             t.equal(stream.statusCode, 200);
-            // Content-Type:
-            // - docker.io gives 'application/octet-stream', which is what
-            //   I'd expect for the GET response at least.
-            // - However gcr.io, at least for the iamge being tested, now
-            //   returns text/html.
             t.equal(stream.headers['content-type'],
-                'text/html',
-                format('expect specific Content-Type on stream response; '
-                    + 'statusCode=%s headers=%j',
-                    stream.statusCode, stream.headers));
+                'application/octet-stream');
             t.ok(stream.headers['content-length']);
 
             var numBytes = 0;
-            var hash = crypto.createHash(digest.split(':')[0]);
+            var hash = crypto.createHash(blobDigest.split(':')[0]);
             stream.on('data', function (chunk) {
                 hash.update(chunk);
                 numBytes += chunk.length;
             });
             stream.on('end', function () {
-                t.equal(hash.digest('hex'), digest.split(':')[1]);
+                t.equal(hash.digest('hex'), blobDigest.split(':')[1]);
                 t.equal(numBytes, Number(stream.headers['content-length']));
                 t.end();
             });
@@ -313,6 +307,40 @@ test('v2 gcr.io', function (tt) {
             // t.equal(res.headers['docker-distribution-api-version'],
             //    'registry/2.0');
 
+            t.end();
+        });
+    });
+
+    tt.test('  blobUpload', function (t) {
+        client.createBlobReadStream({digest: blobDigest},
+                function (err, stream, ress) {
+            t.ifErr(err, 'createBlobReadStream err');
+
+            var last = ress[ress.length - 1];
+            var uploadOpts = {
+                contentLength: parseInt(last.headers['content-length'], 10),
+                digest: blobDigest,
+                stream: stream
+            };
+            client.blobUpload(uploadOpts, function _uploadCb(uploadErr, res) {
+                t.ifErr(uploadErr, 'check blobUpload err');
+                t.equal(res.headers['docker-content-digest'], blobDigest,
+                    'Response header digest should match blob digest');
+                t.end();
+            });
+        });
+    });
+
+    tt.test('  putManifest', function (t) {
+        var uploadOpts = {
+            contentLength: manifestStr.length,
+            manifest: manifestStr,
+            ref: 'test_put_manifest'
+        };
+        client.putManifest(uploadOpts, function _uploadCb(uploadErr, res) {
+            t.ifErr(uploadErr, 'check blobUpload err');
+            //t.equal(res.headers['docker-content-digest'], manifestDigest,
+            //    'Response header digest should match manifest digest');
             t.end();
         });
     });
