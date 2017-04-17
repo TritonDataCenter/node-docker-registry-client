@@ -37,7 +37,8 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         maxSchemaVersion: (opts.schema || 1)
     });
     var tagOrDigest = rar.tag || rar.digest;
-    client.getManifest({ref: tagOrDigest}, function (err, manifest, res) {
+    client.getManifest({ref: tagOrDigest}, function (err, manifest, res,
+                                                     manifestStr) {
         client.close();
         if (err) {
             mainline.fail(cmd, err, opts);
@@ -45,6 +46,6 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         console.error('# response headers');
         console.error(JSON.stringify(res.headers, null, 4));
         console.error('# manifest');
-        console.log(JSON.stringify(manifest, null, 4));
+        console.log(manifestStr);
     });
 });
