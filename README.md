@@ -7,6 +7,12 @@ Limitations: Currently only support for Registry API v1
 (i.e. excluding API endpoints for push) and Registry API v2 *pull* support.
 Support for v2 push endpoints is coming.
 
+Note: This repository is part of the Joyent Triton project. See the
+[contribution
+guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md) --
+*Triton does not use GitHub PRs* -- and general documentation at the main
+[Triton project](https://github.com/joyent/triton) page.
+
 
 ## Install
 
