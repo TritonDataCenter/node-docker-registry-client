@@ -231,11 +231,17 @@ test('v2 gcr.io', function (tt) {
             t.equal(first.headers['docker-distribution-api-version'],
                 'registry/2.0');
 
-            t.ok(stream);
-            t.equal(stream.statusCode, 200);
-            t.equal(stream.headers['content-type'],
-                'application/octet-stream');
-            t.ok(stream.headers['content-length']);
+            t.ok(stream, 'got a stream');
+            t.equal(stream.statusCode, 200,
+                'got a 200 HTTP status: ' + stream.statusCode);
+            // At some point (by July 2017 at least), gcr started responding
+            // with `Content-Type: text/html` for this blob response for this
+            // image. Hrm.
+            // t.equal(stream.headers['content-type'],
+            //     'application/octet-stream');
+            t.ok(stream.headers['content-length'],
+                'got a Content-Length header: '
+                    + stream.headers['content-length']);
 
             var numBytes = 0;
             var hash = crypto.createHash(digest.split(':')[0]);
