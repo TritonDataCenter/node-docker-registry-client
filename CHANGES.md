@@ -4,6 +4,12 @@
 
 (nothing yet)
 
+## 3.2.7
+
+- joyent/node-docker-registry-client#16 Allow a repo name to have a '/', e.g.
+  `registry.gitlab.com/masakura/docker-registry-client-bug-sample/image`
+  (by Józsa Péter).
+
 ## 3.2.6
 
 - DOCKER-984 Add a 10s connect timeout for endpoints involved in initial
