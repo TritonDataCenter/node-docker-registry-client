@@ -146,7 +146,6 @@ test('v2 amazonecr', function (tt) {
      */
     var blobDigest;
     var manifest;
-    var manifestDigest;
     var manifestStr;
     tt.test('  getManifest', function (t) {
         client.getManifest({ref: CONFIG.tag},
@@ -156,7 +155,7 @@ test('v2 amazonecr', function (tt) {
             manifestStr = manifestStr_;
             // Note that Amazon ECR does not return a docker-content-digest
             // header.
-            manifestDigest = res.headers['docker-content-digest'];
+            var manifestDigest = res.headers['docker-content-digest'];
             t.equal(manifestDigest, undefined, 'no docker-content-digest');
             t.ok(manifest);
             t.equal(manifest.schemaVersion, 2);
@@ -250,7 +249,6 @@ test('v2 amazonecr', function (tt) {
             // - Note that docker.io gives 'application/octet-stream'
             t.equal(last.headers['content-type'],
                 'application/vnd.docker.image.rootfs.diff.tar.gzip');
-
             t.ok(last.headers['content-length']);
 
             t.end();
@@ -308,7 +306,7 @@ test('v2 amazonecr', function (tt) {
 
             t.ok(stream);
             t.equal(stream.statusCode, 200);
-            t.equal(stream.headers['content-type'], 'application/x-gzip');
+            t.equal(stream.headers['content-type'], 'application/octet-stream');
             t.ok(stream.headers['content-length']);
 
             var numBytes = 0;
@@ -376,10 +374,15 @@ test('v2 amazonecr', function (tt) {
             manifest: manifestStr,
             ref: 'test_put_manifest'
         };
+        // Calculate the existing manifest digest.
+        var manifestDigest = 'sha256:' + crypto.createHash('sha256')
+            .update(manifestStr, 'binary')
+            .digest('hex');
+
         client.putManifest(uploadOpts, function _uploadCb(uploadErr, res) {
             t.ifErr(uploadErr, 'check blobUpload err');
-            //t.equal(res.headers['docker-content-digest'], manifestDigest,
-            //    'Response header digest should match manifest digest');
+            t.equal(res.headers['docker-content-digest'], manifestDigest,
+                'Response header digest should match manifest digest');
             t.end();
         });
     });
