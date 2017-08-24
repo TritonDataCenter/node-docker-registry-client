@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2017 Joyent, Inc.
  */
 
 /* BEGIN JSSTYLED */
@@ -19,9 +19,9 @@
  * to a *v2* Docker Registry API -- as is called by `docker login`.
  *
  * Usage:
- *      node examples/login.js [INDEX-NAME] [USERNAME] [PASSWORD]
+ *      node examples/login.js [-u username] [-p password] [INDEX-NAME]
  *
- * Run with TRACE=1 envvar to get trace-level logging.
+ * Run with -v for more more verbose logging.
  *
  * Example:
  *      $ node examples/login.js
@@ -32,96 +32,69 @@
  */
 /* END JSSTYLED */
 
-var bunyan = require('bunyan');
-var format = require('util').format;
 var read = require('read');
 var vasync = require('vasync');
 
 var drc = require('../../');
-
+var mainline = require('../mainline');
 
 
 // --- globals
 
 var cmd = 'login';
 
+mainline({cmd: cmd}, function (log, parser, opts, args) {
+    // `docker login` with no args passes
+    // `serveraddress=https://index.docker.io/v1/` (yes, "v1", even for v2 reg).
+    var indexName = args[0] || 'https://index.docker.io/v1/';
+    var username = opts.username;
+    var password = opts.password;
 
-
-// --- internal support stuff
-
-function fail(err) {
-    console.error('%s: error: %s', cmd, err.message || err);
-    process.exit(2);
-}
-
-
-// --- mainline
-
-var logLevel = 'warn';
-if (process.env.TRACE) {
-    logLevel = 'trace';
-}
-var log = bunyan.createLogger({
-    name: cmd,
-    level: logLevel
-});
-
-
-// `docker login` with no args passes
-// `serveraddress=https://index.docker.io/v1/` (yes, "v1", even in a v2 world).
-var indexName = process.argv[2] || 'https://index.docker.io/v1/';
-if (indexName === '-h' || indexName === '--help') {
-    console.error('usage: node examples/v2/%s.js [INDEX] [USERNAME] ' +
-        '[PASSWORD]', cmd);
-    process.exit(2);
-}
-
-var username = process.argv[3];
-var password = process.argv[4];
-vasync.pipeline({funcs: [
-    function getUsername(_, next) {
-        if (username) {
-            return next();
-        }
-        read({prompt: 'Username:'}, function (err, val) {
-            if (err) {
-                return next(err);
+    vasync.pipeline({funcs: [
+        function getUsername(_, next) {
+            if (username) {
+                return next();
             }
-            username = val.trim();
-            next();
-        });
-    },
-    function getPassword(_, next) {
-        if (password) {
-            return next();
-        }
-        read({prompt: 'Password:', silent: true}, function (err, val) {
-            if (err) {
-                return next(err);
-            }
-            password = val.trim();
-            next();
-        });
-    },
-    function doLogin(_, next) {
-        drc.loginV2({
-            indexName: indexName,
-            log: log,
-            // TODO: insecure: insecure,
-            // auth info:
-            username: username,
-            password: password
-        }, function (err, result) {
-            if (err) {
-                next(err);
-            } else {
-                console.log('Result:', JSON.stringify(result, null, 4));
+            read({prompt: 'Username:'}, function (err, val) {
+                if (err) {
+                    return next(err);
+                }
+                username = val.trim();
                 next();
+            });
+        },
+        function getPassword(_, next) {
+            if (password) {
+                return next();
             }
-        });
-    }
-]}, function (err) {
-    if (err) {
-        fail(err);
-    }
+            read({prompt: 'Password:', silent: true}, function (err, val) {
+                if (err) {
+                    return next(err);
+                }
+                password = val.trim();
+                next();
+            });
+        },
+        function doLogin(_, next) {
+            drc.loginV2({
+                indexName: indexName,
+                log: log,
+                // TODO: insecure: insecure,
+                // auth info:
+                username: username,
+                password: password
+            }, function (err, result) {
+                if (err) {
+                    next(err);
+                } else {
+                    console.log('Result:', JSON.stringify(result, null, 4));
+                    next();
+                }
+            });
+        }
+    ]}, function (err) {
+        if (err) {
+            mainline.fail(cmd, err, opts);
+        }
+    });
 });
