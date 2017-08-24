@@ -4,6 +4,11 @@
 
 (nothing yet)
 
+## 3.2.8
+
+- DOCKER-1091 Cannot login into Artifactory private docker registry. This change
+  drops authorization headers from the first ping request.
+
 ## 3.2.7
 
 - joyent/node-docker-registry-client#16 Allow a repo name to have a '/', e.g.

@@ -62,6 +62,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
 
     tt.test('  createClient', function (t) {
         client = drc.createClientV2({
+            maxSchemaVersion: 2,
             name: CONFIG.repo,
             username: CONFIG.username,
             password: CONFIG.password,
@@ -142,18 +143,22 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     });
 
     /*
-     *  {
-     *      "name": <name>,
-     *      "tag": <tag>,
-     *      "fsLayers": [
-     *         {
-     *            "blobSum": <tarsum>
-     *         },
-     *         ...
-     *      ],
-     *      "history": <v1 images>,
-     *      "signature": <JWS>
-     *  }
+     * {
+     *   "schemaVersion": 2,
+     *   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+     *   "config": {
+     *     "mediaType": "application/octet-stream",
+     *     "size": 1459,
+     *     "digest": "sha256:2b8fd9751c4c0f5dd266fc...01"
+     *   },
+     *   "layers": [
+     *     {
+     *       "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     *       "size": 667590,
+     *       "digest": "sha256:8ddc19f16526912237dd8af...a9"
+     *     }
+     *   ]
+     * }
      */
     var manifest;
     var manifestDigest;
@@ -163,13 +168,12 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             manifest = manifest_;
             manifestDigest = res.headers['docker-content-digest'];
             t.ok(manifest);
-            t.equal(manifest.schemaVersion, 1);
-            t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, CONFIG.tag);
-            t.ok(manifest.architecture);
-            t.ok(manifest.fsLayers);
-            t.ok(manifest.history[0].v1Compatibility);
-            t.ok(manifest.signatures[0].signature);
+            t.equal(manifest.schemaVersion, 2);
+            t.ok(manifest.config);
+            t.ok(manifest.config.digest, manifest.config.digest);
+            t.ok(manifest.layers);
+            t.ok(manifest.layers.length > 0);
+            t.ok(manifest.layers[0].digest);
             t.end();
         });
     });
@@ -179,10 +183,9 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             t.ifErr(err);
             t.ok(manifest);
             ['schemaVersion',
-             'name',
-             'tag',
-             'architecture'].forEach(function (k) {
-                t.equal(manifest_[k], manifest[k], k);
+             'config',
+             'layers'].forEach(function (k) {
+               t.deepEqual(manifest_[k], manifest[k], k);
             });
             t.end();
         });
@@ -198,7 +201,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     });
 
     tt.test('  headBlob', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = manifest.layers[0].digest;
         client.headBlob({digest: digest}, function (err, ress) {
             t.ifErr(err, 'no headBlob err');
             t.ok(ress, 'got a "ress"');
@@ -240,7 +243,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
     });
 
     tt.test('  createBlobReadStream', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = manifest.layers[0].digest;
         client.createBlobReadStream({digest: digest},
                 function (err, stream, ress) {
             t.ifErr(err, 'createBlobReadStream err');
