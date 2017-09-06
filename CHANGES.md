@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.2.9
+
+- DOCKER-1097 docker pull fails for registry server that has no auth setup
+
 ## 3.2.8
 
 - DOCKER-1091 Cannot login into Artifactory private docker registry. This change
