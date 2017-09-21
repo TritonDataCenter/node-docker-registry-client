@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.2.10
+
+- DOCKER-1104 support docker manifest lists
+
 ## 3.2.9
 
 - DOCKER-1097 docker pull fails for registry server that has no auth setup

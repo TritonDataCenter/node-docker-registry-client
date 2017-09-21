@@ -32,11 +32,12 @@ function getFirstLayerDigestFromManifest(manifest_) {
     return manifest_.layers[0].digest;
 }
 
-
 // --- Tests
 
 test('v2 docker.io', function (tt) {
     var client;
+    var manifest;
+    var manifestDigest;
     var repo = drc.parseRepo(REPO);
 
     tt.test('  createClient', function (t) {
@@ -110,6 +111,49 @@ test('v2 docker.io', function (tt) {
     /*
      * {
      *   "schemaVersion": 2,
+     *   "mediaType": "application/vnd.docker.dis...ion.manifest.list.v2+json",
+     *   "manifests": [
+     *     {
+     *       "mediaType": "application/vnd.docker.dis...ion.manifest.v2+json",
+     *       "size": 528,
+     *       "digest": "sha256:4b920400cf4c9...29ab9dd64eaa652837cd39c2cdf",
+     *       "platform": {
+     *         "architecture": "amd64",
+     *         "os": "linux"
+     *       }
+     *     }
+     *   ]
+     * }
+     */
+    tt.test('  getManifest (v2.2 list)', function (t) {
+        var getOpts = {
+            acceptManifestLists: true,
+            maxSchemaVersion: 2,
+            ref: TAG
+        };
+        client.getManifest(getOpts, function (err, manifest_, res,
+                manifestStr) {
+            t.ifErr(err);
+            t.ok(manifest_);
+            t.equal(manifest_.schemaVersion, 2);
+            t.equal(manifest_.mediaType, drc.MEDIATYPE_MANIFEST_LIST_V2,
+                'mediaType should be manifest list');
+            t.ok(Array.isArray(manifest_.manifests), 'manifests is an array');
+            manifest_.manifests.forEach(function (m) {
+                t.ok(m.digest, 'm.digest');
+                t.ok(m.platform, 'm.platform');
+                t.ok(m.platform.architecture, 'm.platform.architecture');
+                t.ok(m.platform.os, 'os.platform.os');
+            });
+            // Take the first manifest (for testing purposes).
+            manifestDigest = manifest_.manifests[0].digest;
+            t.end();
+        });
+    });
+
+    /*
+     * {
+     *   "schemaVersion": 2,
      *   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
      *   "config": {
      *     "mediaType": "application/octet-stream",
@@ -125,14 +169,12 @@ test('v2 docker.io', function (tt) {
      *   ]
      * }
      */
-    var manifest;
-    var manifestDigest;
     tt.test('  getManifest (v2.2)', function (t) {
         var getOpts = {ref: TAG, maxSchemaVersion: 2};
-        client.getManifest(getOpts, function (err, manifest_, res) {
+        client.getManifest(getOpts, function (err, manifest_, res,
+                manifestStr) {
             t.ifErr(err);
             manifest = manifest_;
-            manifestDigest = res.headers['docker-content-digest'];
             t.ok(manifest);
             t.equal(manifest.schemaVersion, 2);
             t.ok(manifest.config);
@@ -140,6 +182,13 @@ test('v2 docker.io', function (tt) {
             t.ok(manifest.layers);
             t.ok(manifest.layers.length > 0);
             t.ok(manifest.layers[0].digest);
+
+            var computedDigest = drc.digestFromManifestStr(manifestStr);
+            t.equal(computedDigest, manifestDigest,
+                'compare computedDigest to expected manifest digest');
+            // Note that res.headers['docker-content-digest'] may be incorrect,
+            // c.f. https://github.com/docker/distribution/issues/2395
+
             t.end();
         });
     });
