@@ -5,11 +5,10 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 var crypto = require('crypto');
-var strsplit = require('strsplit');
 var test = require('tape');
 
 var drc = require('..');
@@ -201,7 +200,7 @@ test('v2 docker.io', function (tt) {
         var getOpts = {ref: manifestDigest, maxSchemaVersion: 2};
         client.getManifest(getOpts, function (err, manifest_) {
             t.ifErr(err);
-            t.ok(manifest);
+            t.ok(manifest_, 'Got the manifest object');
             ['schemaVersion',
              'config',
              'layers'].forEach(function (k) {
@@ -216,6 +215,38 @@ test('v2 docker.io', function (tt) {
             t.ok(err);
             t.notOk(manifest_);
             t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (unknown repo)', function (t) {
+        var badRepoClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: 'unknownreponame',
+            log: log
+        });
+        t.ok(badRepoClient);
+        badRepoClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (bad username/password)', function (t) {
+        var badUserClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: REPO,
+            username: 'fredNoExistHere',
+            password: 'fredForgot',
+            log: log
+        });
+        t.ok(badUserClient);
+        badUserClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 401);
             t.end();
         });
     });

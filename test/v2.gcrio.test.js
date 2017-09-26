@@ -135,6 +135,38 @@ test('v2 gcr.io', function (tt) {
         });
     });
 
+    tt.test('  getManifest (unknown repo)', function (t) {
+        var badRepoClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: 'unknownreponame',
+            log: log
+        });
+        t.ok(badRepoClient);
+        badRepoClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (bad username/password)', function (t) {
+        var badUserClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: REPO,
+            username: 'fredNoExistHere',
+            password: 'fredForgot',
+            log: log
+        });
+        t.ok(badUserClient);
+        badUserClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 401);
+            t.end();
+        });
+    });
+
     tt.test('  headBlob', function (t) {
         var digest = manifest.fsLayers[0].blobSum;
         client.headBlob({digest: digest}, function (err, ress) {

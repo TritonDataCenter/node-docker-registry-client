@@ -14,7 +14,7 @@
  */
 
 var crypto = require('crypto');
-var strsplit = require('strsplit');
+var path = require('path');
 var test = require('tape');
 
 var drc = require('..');
@@ -173,6 +173,38 @@ test('v2 registry.gitlab.com', function (tt) {
             t.ok(err);
             t.notOk(manifest_);
             t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (unknown repo)', function (t) {
+        var badRepoClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: path.dirname(REPO) + '/unknownreponame',
+            log: log
+        });
+        t.ok(badRepoClient);
+        badRepoClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (bad username/password)', function (t) {
+        var badUserClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: REPO,
+            username: 'fredNoExistHere',
+            password: 'fredForgot',
+            log: log
+        });
+        t.ok(badUserClient);
+        badUserClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 401);
             t.end();
         });
     });

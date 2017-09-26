@@ -5,11 +5,12 @@
  */
 
 /*
- * Copyright (c) 2016, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 var assert = require('assert-plus');
 var crypto = require('crypto');
+var path = require('path');
 var test = require('tape');
 
 var drc = require('..');
@@ -167,6 +168,46 @@ test('v2 amazonecr', function (tt) {
             t.ok(err);
             t.notOk(manifest_);
             t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (unknown repo)', function (t) {
+        var badRepoClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: path.dirname(CONFIG.repo) + '/unknownreponame',
+            username: CONFIG.username,
+            password: CONFIG.password,
+            log: log
+        });
+        t.ok(badRepoClient);
+        badRepoClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (bad username/password)', function (t) {
+        var badUserClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: CONFIG.repo,
+            username: 'AWS',
+            password: 'IForgot',
+            log: log
+        });
+        t.ok(badUserClient);
+        badUserClient.getManifest({ref: 'latest'}, function (err, manifest_) {
+            t.ok(err, 'Expected an error on a missing repo');
+            t.notOk(manifest_);
+            // Amazon is different in this case - it gives a 400 error, whilst
+            // other registries return a 401 error:
+            // {"errors":[{
+            //      "code": "DENIED",
+            //      "message": "Your Authorization Token is invalid."
+            // }]}
+            t.equal(err.statusCode, 400);
             t.end();
         });
     });

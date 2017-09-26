@@ -4,6 +4,11 @@
 
 (nothing yet)
 
+## 3.2.11
+
+- DOCKER-1095 docker pull should distinguish between auth error and not found
+  error
+
 ## 3.2.10
 
 - DOCKER-1104 support docker manifest lists
