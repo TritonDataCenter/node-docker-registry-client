@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.2.12
+
+- joyent/node-docker-registry-client#23 Namespace validation too strict
+
 ## 3.2.11
 
 - DOCKER-1095 docker pull should distinguish between auth error and not found
