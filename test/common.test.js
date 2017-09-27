@@ -363,6 +363,23 @@ test('parseRepo', function (t) {
         'canonicalName': 'myreg.example.com:1234/foo/bar'
     });
 
+    t.throws(
+        function () {
+            parseRepo('registry.gitlab.com/user@name/repo-a/repo-b');
+        },
+        /invalid repository namespace/);
+
+    t.deepEqual(parseRepo('registry.gitlab.com/user.name/repo-a/repo-b'), {
+        'index': {
+            'name': 'registry.gitlab.com',
+            'official': false
+        },
+        'official': false,
+        'remoteName': 'user.name/repo-a/repo-b',
+        'localName': 'registry.gitlab.com/user.name/repo-a/repo-b',
+        'canonicalName': 'registry.gitlab.com/user.name/repo-a/repo-b'
+    });
+
     t.end();
 });
 
