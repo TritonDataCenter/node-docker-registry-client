@@ -20,8 +20,8 @@ var drc = require('..');
 var format = util.format;
 var log = require('./lib/log');
 
-var REPO = 'gcr.io/google_containers/pause-amd64';
-var TAG = '3.0';
+var REPO = 'gcr.io/google_containers/pause';
+var TAG = 'latest';
 
 // --- Tests
 
@@ -31,6 +31,7 @@ test('v2 gcr.io', function (tt) {
 
     tt.test('  createClient', function (t) {
         client = drc.createClientV2({
+            maxSchemaVersion: 2,
             name: REPO,
             maxSchemaVersion: 2,
             log: log
@@ -80,18 +81,22 @@ test('v2 gcr.io', function (tt) {
     });
 
     /*
-     *  {
-     *      "name": <name>,
-     *      "tag": <tag>,
-     *      "fsLayers": [
-     *         {
-     *            "blobSum": <tarsum>
-     *         },
-     *         ...
-     *      ],
-     *      "history": <v1 images>,
-     *      "signature": <JWS>
-     *  }
+     * {
+     *   "schemaVersion": 2,
+     *   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+     *   "config": {
+     *     "mediaType": "application/octet-stream",
+     *     "size": 1459,
+     *     "digest": "sha256:2b8fd9751c4c0f5dd266fc...01"
+     *   },
+     *   "layers": [
+     *     {
+     *       "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+     *       "size": 667590,
+     *       "digest": "sha256:8ddc19f16526912237dd8af...a9"
+     *     }
+     *   ]
+     * }
      */
     var manifest;
     var manifestDigest;
@@ -101,13 +106,13 @@ test('v2 gcr.io', function (tt) {
             manifest = manifest_;
             manifestDigest = res.headers['docker-content-digest'];
             t.ok(manifest);
-            t.equal(manifest.schemaVersion, 1);
-            t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, TAG);
-            t.ok(manifest.architecture);
-            t.ok(manifest.fsLayers);
-            t.ok(manifest.history[0].v1Compatibility);
-            t.ok(manifest.signatures[0].signature);
+            t.ok(manifestDigest, 'check for manifest digest header');
+            t.equal(manifest.schemaVersion, 2);
+            t.ok(manifest.config);
+            t.ok(manifest.config.digest, manifest.config.digest);
+            t.ok(manifest.layers);
+            t.ok(manifest.layers.length > 0);
+            t.ok(manifest.layers[0].digest);
             t.end();
         });
     });
@@ -168,7 +173,7 @@ test('v2 gcr.io', function (tt) {
     });
 
     tt.test('  headBlob', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = manifest.layers[0].digest;
         client.headBlob({digest: digest}, function (err, ress) {
             t.ifErr(err);
             t.ok(ress, 'got responses');
@@ -237,7 +242,7 @@ test('v2 gcr.io', function (tt) {
     });
 
     tt.test('  createBlobReadStream', function (t) {
-        var digest = manifest.fsLayers[0].blobSum;
+        var digest = manifest.layers[0].digest;
         client.createBlobReadStream({digest: digest},
                 function (err, stream, ress) {
             t.ifErr(err);
@@ -258,8 +263,6 @@ test('v2 gcr.io', function (tt) {
                 t.equal(first.headers['docker-content-digest'], digest);
             }
 
-            // Docker-Distribution-Api-Version header:
-            // docker.io includes this header here, gcr.io does not.
             t.equal(first.headers['docker-distribution-api-version'],
                 'registry/2.0');
 
