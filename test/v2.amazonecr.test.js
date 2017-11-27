@@ -144,7 +144,6 @@ test('v2 amazonecr', function (tt) {
      *   ]
      * }
      */
-    var blobDigest;
     var manifest;
     var manifestStr;
     tt.test('  getManifest', function (t) {
@@ -349,19 +348,20 @@ test('v2 amazonecr', function (tt) {
     });
 
     tt.test('  blobUpload', function (t) {
-        client.createBlobReadStream({digest: blobDigest},
+        var digest = manifest.layers[0].digest;
+        client.createBlobReadStream({digest: digest},
                 function (err, stream, ress) {
             t.ifErr(err, 'createBlobReadStream err');
 
             var last = ress[ress.length - 1];
             var uploadOpts = {
                 contentLength: parseInt(last.headers['content-length'], 10),
-                digest: blobDigest,
+                digest: digest,
                 stream: stream
             };
             client.blobUpload(uploadOpts, function _uploadCb(uploadErr, res) {
                 t.ifErr(uploadErr, 'check blobUpload err');
-                t.equal(res.headers['docker-content-digest'], blobDigest,
+                t.equal(res.headers['docker-content-digest'], digest,
                     'Response header digest should match blob digest');
                 t.end();
             });
