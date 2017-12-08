@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.2.13
+
+- DOCKER-1050 add redirect handling for docker registry client getManifest call
+
 ## 3.2.12
 
 - joyent/node-docker-registry-client#23 Namespace validation too strict

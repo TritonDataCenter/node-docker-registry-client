@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 var crypto = require('crypto');
@@ -33,6 +33,7 @@ test('v2 gcr.io', function (tt) {
     tt.test('  createClient', function (t) {
         client = drc.createClientV2({
             name: REPO,
+            maxSchemaVersion: 2,
             log: log
         });
         t.ok(client);
@@ -263,17 +264,19 @@ test('v2 gcr.io', function (tt) {
             t.equal(first.headers['docker-distribution-api-version'],
                 'registry/2.0');
 
-            t.ok(stream, 'got a stream');
-            t.equal(stream.statusCode, 200,
-                'got a 200 HTTP status: ' + stream.statusCode);
-            // At some point (by July 2017 at least), gcr started responding
-            // with `Content-Type: text/html` for this blob response for this
-            // image. Hrm.
-            // t.equal(stream.headers['content-type'],
-            //     'application/octet-stream');
-            t.ok(stream.headers['content-length'],
-                'got a Content-Length header: '
-                    + stream.headers['content-length']);
+            t.ok(stream);
+            t.equal(stream.statusCode, 200);
+            // Content-Type:
+            // - docker.io gives 'application/octet-stream', which is what
+            //   I'd expect for the GET response at least.
+            // - However gcr.io, at least for the iamge being tested, now
+            //   returns text/html.
+            t.equal(stream.headers['content-type'],
+                'text/html',
+                format('expect specific Content-Type on stream response; '
+                    + 'statusCode=%s headers=%j',
+                    stream.statusCode, stream.headers));
+            t.ok(stream.headers['content-length']);
 
             var numBytes = 0;
             var hash = crypto.createHash(digest.split(':')[0]);

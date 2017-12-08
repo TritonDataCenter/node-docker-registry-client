@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /*
@@ -162,7 +162,7 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
      */
     var manifest;
     var manifestDigest;
-    tt.test('  getManifest', function (t) {
+    tt.test('  getManifest (v2.1)', function (t) {
         client.getManifest({ref: CONFIG.tag}, function (err, manifest_, res) {
             t.ifErr(err);
             manifest = manifest_;
@@ -178,15 +178,51 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
         });
     });
 
-    tt.test('  getManifest (by digest)', function (t) {
+    // Note: The manifestDigest returned above is for a v2.2 manifest (i.e. it
+    // was originally pushed as a v2.2 manifest), so requesting this digest via
+    // the v2.1 API will fail, as the digest will not match up!
+    tt.test('  getManifest (v2.1 by digest)', function (t) {
         client.getManifest({ref: manifestDigest}, function (err, manifest_) {
+            t.ok(err, 'expect an err');
+            t.notOk(manifest_);
+            t.equal(err.statusCode, 404);
+            t.end();
+        });
+    });
+
+    var v2Manifest;
+    var v2ManifestDigest;
+    tt.test('  getManifest (v2.2)', function (t) {
+        var getOpts = {ref: CONFIG.tag, maxSchemaVersion: 2};
+        client.getManifest(getOpts, function (err, manifest_, res) {
             t.ifErr(err);
-            t.ok(manifest);
-            ['schemaVersion',
-             'config',
-             'layers'].forEach(function (k) {
-               t.deepEqual(manifest_[k], manifest[k], k);
-            });
+            v2Manifest = manifest_;
+            v2ManifestDigest = res.headers['docker-content-digest'];
+            t.ok(v2Manifest);
+            t.equal(v2Manifest.schemaVersion, 2);
+            t.ok(v2Manifest.config);
+            t.ok(v2Manifest.config.digest);
+            t.ok(v2Manifest.layers);
+            t.ok(v2Manifest.layers.length > 0);
+            t.ok(v2Manifest.layers[0].digest);
+            t.end();
+        });
+    });
+
+    tt.test('  getManifest (v2.2 by digest)', function (t) {
+        var opts = {
+            maxSchemaVersion: 2,
+            ref: v2ManifestDigest
+        };
+        client.getManifest(opts, function (err, manifest_) {
+            t.ifErr(err);
+            t.ok(manifest_);
+            t.equal(manifest_.schemaVersion, 2);
+            t.ok(manifest_.config);
+            t.ok(manifest_.config.digest);
+            t.ok(manifest_.layers);
+            t.ok(manifest_.layers.length > 0);
+            t.ok(manifest_.layers[0].digest);
             t.end();
         });
     });
