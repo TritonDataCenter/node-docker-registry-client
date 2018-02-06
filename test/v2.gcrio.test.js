@@ -33,7 +33,6 @@ test('v2 gcr.io', function (tt) {
         client = drc.createClientV2({
             maxSchemaVersion: 2,
             name: REPO,
-            maxSchemaVersion: 2,
             log: log
         });
         t.ok(client);

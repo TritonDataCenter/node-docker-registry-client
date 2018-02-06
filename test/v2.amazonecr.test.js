@@ -100,7 +100,6 @@ test('v2 amazonecr', function (tt) {
             name: CONFIG.repo,
             username: CONFIG.username,
             password: CONFIG.password,
-            maxSchemaVersion: 2,
             log: log
         });
         t.ok(client);

@@ -66,7 +66,6 @@ test('v2 docker.io private repo (' + CONFIG.repo + ')', function (tt) {
             name: CONFIG.repo,
             username: CONFIG.username,
             password: CONFIG.password,
-            maxSchemaVersion: 2,
             log: log
         });
         t.ok(client);
