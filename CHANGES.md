@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.3.0
+
+- DOCKER-524 Implement docker push. Adds uploadBlob and putManifest API methods.
+
 ## 3.2.13
 
 - DOCKER-1050 add redirect handling for docker registry client getManifest call
