@@ -188,6 +188,7 @@ test('v2 amazonecr', function (tt) {
             t.ok(err, 'Expected an error on a missing repo');
             t.notOk(manifest_);
             t.equal(err.statusCode, 404);
+            badRepoClient.close();
             t.end();
         });
     });
@@ -211,6 +212,7 @@ test('v2 amazonecr', function (tt) {
             //      "message": "Your Authorization Token is invalid."
             // }]}
             t.equal(err.statusCode, 400);
+            badUserClient.close();
             t.end();
         });
     });

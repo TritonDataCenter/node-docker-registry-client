@@ -150,6 +150,7 @@ test('v2 gcr.io', function (tt) {
             t.ok(err, 'Expected an error on a missing repo');
             t.notOk(manifest_);
             t.equal(err.statusCode, 404);
+            badRepoClient.close();
             t.end();
         });
     });
@@ -167,6 +168,7 @@ test('v2 gcr.io', function (tt) {
             t.ok(err, 'Expected an error on a missing repo');
             t.notOk(manifest_);
             t.equal(err.statusCode, 401);
+            badUserClient.close();
             t.end();
         });
     });
