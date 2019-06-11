@@ -33,7 +33,8 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         log: log,
         username: opts.username,
         password: opts.password,
-        insecure: opts.insecure
+        insecure: opts.insecure,
+        ca: opts.ca,
     }, function (err, body, res, req) {
         if (res) {
             console.log('HTTP status: %s', res.statusCode);

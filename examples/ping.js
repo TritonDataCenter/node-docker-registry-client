@@ -29,6 +29,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     drc.createClient({
         name: name,
         insecure: opts.insecure,
+        ca: opts.ca,
         log: log
     }, function (createErr, reg) {
         if (createErr) {

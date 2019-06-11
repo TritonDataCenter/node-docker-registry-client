@@ -29,6 +29,7 @@ mainline({cmd: cmd, excludeAuth: true}, function (log, parser, opts, args) {
     drc.pingIndexV1({
         indexName: args[0],
         insecure: opts.insecure,
+        ca: opts.ca,
         log: log
     }, function (err, status, res) {
         if (err) {

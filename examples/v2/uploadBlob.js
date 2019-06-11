@@ -59,6 +59,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
     getFileSha256(filepath, function (err, sha256) {
         var client = drc.createClientV2({
             insecure: opts.insecure,
+            ca: opts.ca,
             log: log,
             repo: rar,
             username: opts.username,

@@ -31,6 +31,7 @@ mainline({cmd: cmd}, function (log, parser, opts, args) {
         name: name,
         log: log,
         insecure: opts.insecure,
+        ca: opts.ca,
         username: opts.username,
         password: opts.password
     });
