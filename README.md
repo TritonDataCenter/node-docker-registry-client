@@ -8,9 +8,8 @@ Limitations: Currently only support for Registry API v1
 Support for v2 push endpoints is coming.
 
 Note: This repository is part of the Joyent Triton project. See the
-[contribution
-guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md) --
-*Triton does not use GitHub PRs* -- and general documentation at the main
+[contribution guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md)
+and general documentation at the main
 [Triton project](https://github.com/joyent/triton) page.
 
 
@@ -341,9 +340,6 @@ For naming this package attempts to consistently use `repo` for repository,
 Before commit, ensure that the following checks are clean:
 
     make prepush
-
-Also see the note at the top that cr.joyent.us is used for code review for
-this repo.
 
 
 ### Releases
