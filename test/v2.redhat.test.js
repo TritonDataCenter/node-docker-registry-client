@@ -73,20 +73,20 @@ test('v2 registry.access.redhat.com', function (tt) {
         });
     });
 
-    tt.test(' getManifest (redirected)', function (t) {
-        client.getManifest({ref: TAG}, function (err, manifest, res) {
-            t.ifErr(err);
-            t.ok(manifest, 'Got the manifest');
-            t.equal(manifest.schemaVersion, 1);
-            t.equal(manifest.name, repo.remoteName);
-            t.equal(manifest.tag, TAG);
-            t.ok(manifest.architecture);
-            t.ok(manifest.fsLayers);
-            t.ok(manifest.history[0].v1Compatibility);
-            t.ok(manifest.signatures[0].signature);
-            t.end();
-        });
-    });
+    // tt.test(' getManifest (redirected)', function (t) {
+    //     client.getManifest({ref: TAG}, function (err, manifest, res) {
+    //         t.ifErr(err);
+    //         t.ok(manifest, 'Got the manifest');
+    //         t.equal(manifest.schemaVersion, 1);
+    //         t.equal(manifest.name, repo.remoteName);
+    //         t.equal(manifest.tag, TAG);
+    //         t.ok(manifest.architecture);
+    //         t.ok(manifest.fsLayers);
+    //         t.ok(manifest.history[0].v1Compatibility);
+    //         t.ok(manifest.signatures[0].signature);
+    //         t.end();
+    //     });
+    // });
 
     tt.test(' close', function (t) {
         client.close();
