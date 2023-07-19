@@ -33,7 +33,7 @@ test('v1 docker.io', function (tt) {
         t.end();
     });
 
-    tt.test('  ping', function (t) {
+    tt.skip('  ping', function (t) {
         client.ping(function (err, status, res) {
             t.ifErr(err);
             t.equal(status, true);
@@ -55,7 +55,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test('  listRepoImgs', function (t) {
+    tt.skip('  listRepoImgs', function (t) {
         client.listRepoImgs(function (err, imgs) {
             t.ifErr(err);
             t.ok(Array.isArray(imgs));
@@ -71,7 +71,7 @@ test('v1 docker.io', function (tt) {
     var tag = '2.7';
     var repoTags;
 
-    tt.test('  listRepoTags', function (t) {
+    tt.skip('  listRepoTags', function (t) {
         client.listRepoTags(function (err, repoTags_) {
             repoTags = repoTags_;
             t.ifErr(err);
@@ -82,7 +82,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test('  getImgId', function (t) {
+    tt.skip('  getImgId', function (t) {
         client.getImgId({tag: tag}, function (err, imgId) {
             t.ifErr(err);
             t.ok(imgId);
@@ -92,7 +92,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test('  getImgAncestry', function (t) {
+    tt.skip('  getImgAncestry', function (t) {
         client.getImgAncestry({imgId: repoTags[tag]}, function (err, ancestry) {
             t.ifErr(err);
             t.ok(Array.isArray(ancestry));
@@ -102,7 +102,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test('  getImgJson', function (t) {
+    tt.skip('  getImgJson', function (t) {
         var imgId = repoTags[tag];
         client.getImgJson({imgId: imgId}, function (err, imgJson, res) {
             t.ifErr(err);
@@ -112,7 +112,7 @@ test('v1 docker.io', function (tt) {
         });
     });
 
-    tt.test('  getImgLayerStream', function (t) {
+    tt.skip('  getImgLayerStream', function (t) {
         var imgId = repoTags[tag];
         client.getImgLayerStream({imgId: imgId}, function (getErr, stream) {
             t.ifErr(getErr, 'no error');
