@@ -6,6 +6,7 @@
 
 /*
  * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2023 MNX Cloud, Inc.
  */
 
 var crypto = require('crypto');
@@ -252,6 +253,39 @@ test('v2 docker.io', function (tt) {
             t.end();
         });
     });
+
+    tt.test('  getManifest (oci list)', function (t) {
+        var ociRepoClient = drc.createClientV2({
+            maxSchemaVersion: 2,
+            name: 'nginxproxy/nginx-proxy',
+            log: log
+        });
+        t.ok(ociRepoClient);
+        var listOpts = {
+            acceptManifestLists: true,
+            ref: TAG
+        };
+        ociRepoClient.getManifest(listOpts, function (err, manifest_) {
+            t.ifErr(err);
+            t.ok(manifest_);
+            t.equal(manifest_.schemaVersion, 2);
+            t.equal(manifest_.mediaType, drc.MEDIATYPE_OCI_MANIFEST_LIST_V1,
+                'mediaType should be manifest list');
+            t.ok(Array.isArray(manifest_.manifests), 'manifests is an array');
+            manifest_.manifests.forEach(function (m) {
+                t.ok(m.digest, 'm.digest');
+                t.ok(m.platform, 'm.platform');
+                t.ok(m.platform.architecture, 'm.platform.architecture');
+                t.ok(m.platform.os, 'os.platform.os');
+            });
+            // Take the first manifest (for testing purposes).
+            manifestDigest = manifest_.manifests[0].digest;
+
+            // ociRepoClient.close();
+            t.end();
+        });
+    });
+
 
     tt.test('  headBlob', function (t) {
         var digest = getFirstLayerDigestFromManifest(manifest);

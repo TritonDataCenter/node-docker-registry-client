@@ -1,8 +1,8 @@
 {
     "name": "docker-registry-client",
-    "version": "3.3.1",
+    "version": "3.4.0",
     "description": "node.js client for the Docker Registry API",
-    "author": "Joyent (joyent.com)",
+    "author": "MNX Cloud (mnx.io)",
     "main": "./lib/index.js",
     "dependencies": {
         "assert-plus": "^0.1.5",
@@ -38,7 +38,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/joyent/node-docker-registry-client.git"
+        "url": "https://github.com/TritonDataCenter/node-docker-registry-client.git"
     },
     "license": "MPL-2.0"
 }

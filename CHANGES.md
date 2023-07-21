@@ -4,6 +4,13 @@
 
 (nothing yet)
 
+## 3.4.0
+
+- TRITON-2403 Add support for docker OCI manifest format
+
+As of this version, v1 repositories are still supported, but most tests have
+been disabled due to the lack of available public repositories.
+
 ## 3.3.0
 
 - DOCKER-524 Implement docker push. Adds uploadBlob and putManifest API methods.
@@ -81,12 +88,10 @@
 - #8 Fix usage against a *http* registry.
 - #7 Fix test suite against Docker Hub.
 
-
 ## 3.1.5
 
 - DOCKER-772: Change `pingV2` to `callback(err)` rather than `throw err` if
   the given `opts.indexName` is invalid.
-
 
 ## 3.1.4
 
@@ -94,24 +99,20 @@
   email (docker/docker#20565). This updates `drc.login()` to no blow up
   attempting to do v1 login if an email is not provided.
 
-
 ## 3.1.3
 
 - DOCKER-689 Don't overwrite `err.body` for an HTTP response error that doesn't have
   a JSON body.
 
-
 ## 3.1.2
 
 - IMGAPI-546: 'docker pull nope.example.com/nope' throws exception in IMGAPI
-
 
 ## 3.1.1
 
 - IMGAPI-542: Don't *require* the Docker-Content-Digest header on v2 GetBlob
   server responses: `RegistryClientV2.prototype.createBlobReadStream`. Also
   don't throw if can't parse an existing Docker-Content-Digest header.
-
 
 ## 3.1.0
 
@@ -158,13 +159,10 @@
             }
         });
 
-
-
 ## 3.0.5
 
 - DOCKER-643: RegistryClientV2 doesn't pass `insecure` flag to `ping()`
   function properly.
-
 
 ## 3.0.4
 
@@ -179,13 +177,11 @@
 - Fix my config error that made me think the v2.quayioprivate tests
   were failing. Re-enable that test in `make test`.
 
-
 ## 3.0.3
 
 - DOCKER-627: Fix login for v2 quay.io. Two issues here:
   1. quay.io has a bug where www-authenticate header isn't always in 401 response headers
   2. passing "scope=" (empty value) query param to quay.io/v2/auth results in a 400
-
 
 ## 3.0.2
 
@@ -205,11 +201,9 @@
   tests. Will revisit this later.  See "test/v2.quayio.test.js" for some
   notes on what I think are quay.io v2 bugs that I'll report.
 
-
 ## 3.0.1
 
 - DOCKER-586 Allow `opts.proxy` to be a boolean.
-
 
 ## 3.0.0
 
@@ -227,7 +221,6 @@
   in this module just to follow the form of the Docker Remote API "GET /auth"
   response, and (b) this will mean being compatible with `pingV2`.
 
-
 ## 2.0.2
 
 - DOCKER-583: Docker pull from v1 private registry failed with Resource Not Found error
@@ -237,7 +230,6 @@
 - DOCKER-580 Fix "too few args to sprintf" error when failing token auth.
 - Fix passing through of username (for token 'account' field) and basic
   authorization for token auth.
-
 
 ## 2.0.0
 
@@ -249,11 +241,9 @@
   My understanding is that this was due to <https://github.com/nodejs/node/issues/3055>.
   This module is now avoiding `agent: false`, at least for the blob downloads.
 
-
 ## 1.4.1
 
 - DOCKER-549 Fix pulling from quay.io *private* repos.
-
 
 ## 1.4.0
 
@@ -269,7 +259,6 @@
   require auth on the ping endpoint.
 - v1 Search doesn't need to do a ping. Presumably this is historical for
   mistakenly thinking there was a need to determine `this.standalone`.
-
 
 ## 1.3.0
 
@@ -294,24 +283,19 @@
 
   The "example/\*.js" scripts all do this now.
 
-
-
 ## 1.2.2
 
 - [pull #4] Fix `getImgAncestry` when using node 0.12 (by github.com/vincentwoo).
 
-
 ## 1.2.1
 
 - Sanitize the non-json (text/html) `err.message` from `listRepoImgs` on a 404.
-  See before and after: https://gist.github.com/trentm/94c11e1243fb7fd4fe90
-
+  See before and after: <https://gist.github.com/trentm/94c11e1243fb7fd4fe90>
 
 ## 1.2.0
 
 - Add `drc.login(...)` for handling a Docker Engine would use for the Remote
   API side of `docker login`.
-
 
 ## 1.1.0
 
@@ -322,7 +306,6 @@
   'node-docker-registry-client/$ver (...)'.
 - A client to localhost will default to the 'http' scheme to (mostly) match
   docker-docker's behaviour here.
-
 
 ## 1.0.0
 
@@ -340,7 +323,6 @@ session handling is done lazily under the hood. There is no longer a separate
 There *is* a `drc.pingIndex()` which can be used to check that a registry
 host (aka an "index" from the old separation of an "Index API") is up.
 Usage is best learned from the complete set of examples in "examples/".
-
 
 - **Backward incompat change** in return value from `parseRepoAndTag`.
   In addition to adding support for the optional index prefix, and a
@@ -392,8 +374,6 @@ Usage is best learned from the complete set of examples in "examples/".
             tag: '1.2.3'
         }
 
-
-
 ## 0.3.2
 
 Note: Any 0.x work (I don't anticipate any) will be on the "0.x" branch.
@@ -414,7 +394,6 @@ Note: Any 0.x work (I don't anticipate any) will be on the "0.x" branch.
   with "checksum" values this could possibly be useful for validation of
   subsequent downloads.
 - URL encode params in API call paths.
-
 
 ## 0.2.0
 
