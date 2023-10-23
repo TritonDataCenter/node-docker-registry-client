@@ -98,60 +98,61 @@ If a scheme isn't given, then "https" is assumed.
 
 If you know, for example, that you are only dealing with a v2 Docker Registry,
 then simple usage will look like this:
+```javascript
+var drc = require('docker-registry-client');
+var REPO = 'alpine';
+var client = drc.createClientV2({name: REPO});
 
-    var drc = require('docker-registry-client');
-    var REPO = 'alpine';
-    var client = drc.createClientV2({name: REPO});
+client.listTags(function (err, tags) {
+    // ...
+    console.log(JSON.stringify(tags, null, 4));
 
-    client.listTags(function (err, tags) {
-        // ...
-        console.log(JSON.stringify(tags, null, 4));
-
-        /*
-         * Because the client is typically using Keep-Alive, it will maintain
-         * open connections. Therefore you should call `.close()` to close
-         * those when finished.
-         */
-        client.close();
-    });
+    /*
+     * Because the client is typically using Keep-Alive, it will maintain
+     * open connections. Therefore you should call `.close()` to close
+     * those when finished.
+     */
+    client.close();
+});
+```
 
 A more complete example (showing logging, auth, etc.):
+```javascript
+var bunyan = require('bunyan');
+var drc = require('docker-registry-client');
 
-    var bunyan = require('bunyan');
-    var drc = require('docker-registry-client');
+// This package uses https://github.com/trentm/node-bunyan for logging.
+var log = bunyan.createLogger({
+    name: 'regplay',
+    // TRACE-level logging will show you all request/response activity
+    // with the registry. This isn't suggested for production usage.
+    level: 'trace'
+});
 
-    // This package uses https://github.com/trentm/node-bunyan for logging.
-    var log = bunyan.createLogger({
-        name: 'regplay',
-        // TRACE-level logging will show you all request/response activity
-        // with the registry. This isn't suggested for production usage.
-        level: 'trace'
-    });
-
-    var REPO = 'alpine';
-    var client = drc.createClientV2({
-        name: REPO,
-        log: log,
-        // Optional basic auth to the registry
-        username: <username>,
-        password: <password>,
-        // Optional, for a registry without a signed TLS certificate.
-        insecure: <true|false>,
-        // ... see the source code for other options
-    });
-
+var REPO = 'alpine';
+var client = drc.createClientV2({
+    name: REPO,
+    log: log,
+    // Optional basic auth to the registry
+    username: <username>,
+    password: <password>,
+    // Optional, for a registry without a signed TLS certificate.
+    insecure: <true|false>,
+    // ... see the source code for other options
+});
+```
 
 This package also supports the nominal technique for pinging the registry
 to see if it supports v2, otherwise falling back to v1:
+```javascript
+var drc = require('docker-registry-client');
 
-    var drc = require('docker-registry-client');
-
-    var REPO = 'alpine';
-    drc.createClient({name: REPO, /* ... */}, function (err, client) {
-        console.log('Got a Docker Registry API v%d client', client.version);
-        // ...
-    });
-
+var REPO = 'alpine';
+drc.createClient({name: REPO, /* ... */}, function (err, client) {
+    console.log('Got a Docker Registry API v%d client', client.version);
+    // ...
+});
+```
 
 
 ## v2 API
@@ -311,21 +312,21 @@ pretty output:
 
 
 V1 client usage:
-
-    var repo = 'alpine';
-    var client = drc.createClientV1({
-        name: repo,
-        // ...
-    });
-    client.listRepoTags(function (err, repoTags) {
-        client.close();
-        if (err) {
-            console.log(err);
-            process.exit(1);
-        }
-        console.log(JSON.stringify(repoTags, null, 4));
-    });
-
+```javascript
+var repo = 'alpine';
+var client = drc.createClientV1({
+    name: repo,
+    // ...
+});
+client.listRepoTags(function (err, repoTags) {
+    client.close();
+    if (err) {
+        console.log(err);
+        process.exit(1);
+    }
+    console.log(JSON.stringify(repoTags, null, 4));
+});
+```
 
 ## Development
 
