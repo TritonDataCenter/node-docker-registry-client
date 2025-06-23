@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 3.5.0
+
+- Add support for multi-architecture repositories.
+
 ## 3.4.0
 
 - TRITON-2403 Add support for docker OCI manifest format

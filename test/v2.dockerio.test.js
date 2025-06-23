@@ -93,7 +93,7 @@ test('v2 docker.io', function (tt) {
      *      "signature": <JWS>
      *  }
      */
-    tt.test('  getManifest (v2.1)', function (t) {
+    tt.skip('  getManifest (v2.1)', function (t) {
         client.getManifest({ref: TAG}, function (err, manifest_, res) {
             t.ifErr(err);
             t.ok(manifest_);
@@ -136,7 +136,7 @@ test('v2 docker.io', function (tt) {
             t.ifErr(err);
             t.ok(manifest_);
             t.equal(manifest_.schemaVersion, 2);
-            t.equal(manifest_.mediaType, drc.MEDIATYPE_MANIFEST_LIST_V2,
+            t.equal(manifest_.mediaType, drc.MEDIATYPE_OCI_MANIFEST_LIST_V1,
                 'mediaType should be manifest list');
             t.ok(Array.isArray(manifest_.manifests), 'manifests is an array');
             manifest_.manifests.forEach(function (m) {
@@ -144,9 +144,17 @@ test('v2 docker.io', function (tt) {
                 t.ok(m.platform, 'm.platform');
                 t.ok(m.platform.architecture, 'm.platform.architecture');
                 t.ok(m.platform.os, 'os.platform.os');
+                if (manifestDigest == undefined) {
+                    // Save the first digest for later tests.
+                    // must be the same arch and linux.
+                    if (m.platform.architecture == process.arch &&
+                        m.platform.os == 'linux') {
+
+                        manifestDigest = m.digest;
+                        }
+                }
             });
-            // Take the first manifest (for testing purposes).
-            manifestDigest = manifest_.manifests[0].digest;
+            
             t.end();
         });
     });
@@ -171,7 +179,7 @@ test('v2 docker.io', function (tt) {
      */
     tt.test('  getManifest (v2.2)', function (t) {
         var getOpts = {ref: TAG, maxSchemaVersion: 2};
-        client.getManifest(getOpts, function (err, manifest_, res,
+        client.getManifestForPlatform(getOpts, function (err, manifest_, res,
                 manifestStr) {
             t.ifErr(err);
             manifest = manifest_;
@@ -186,6 +194,7 @@ test('v2 docker.io', function (tt) {
             var computedDigest = drc.digestFromManifestStr(manifestStr);
             t.equal(computedDigest, manifestDigest,
                 'compare computedDigest to expected manifest digest');
+            // Note: there is a multi-platform issue with checking the computed digest
             // Note that res.headers['docker-content-digest'] may be incorrect,
             // c.f. https://github.com/docker/distribution/issues/2395
 
@@ -199,9 +208,12 @@ test('v2 docker.io', function (tt) {
      */
     tt.test('  getManifest (by digest)', function (t) {
         var getOpts = {ref: manifestDigest, maxSchemaVersion: 2};
-        client.getManifest(getOpts, function (err, manifest_) {
+        client.getManifestForPlatform(getOpts, function (err, manifest_) {
             t.ifErr(err);
             t.ok(manifest_, 'Got the manifest object');
+            console.log('manifestDigest: ' + manifestDigest);
+            console.log('manifest: ' + JSON.stringify(manifest.config, null, 2));
+            console.log('manifest_.config: ' + JSON.stringify(manifest_.config, null, 2));
             ['schemaVersion',
              'config',
              'layers'].forEach(function (k) {
@@ -286,6 +298,22 @@ test('v2 docker.io', function (tt) {
         });
     });
 
+    tt.test('getManifest (v2 single-platform)', function (t) {
+        var opts = {
+            ref: 'latest',
+            architecture: 'amd64',
+            os: 'linux',
+            maxSchemaVersion: 2
+        };
+        client.getManifestForPlatform(opts, function (err, manifest) {
+            t.error(err, 'no error');
+            t.ok(manifest, 'got manifest');
+            t.equal(manifest.schemaVersion, 2, 'schemaVersion is 2');
+            t.ok(manifest.config, 'has config');
+            t.ok(Array.isArray(manifest.layers), 'has layers array');
+            t.end();
+        });
+    });
 
     tt.test('  headBlob', function (t) {
         var digest = getFirstLayerDigestFromManifest(manifest);

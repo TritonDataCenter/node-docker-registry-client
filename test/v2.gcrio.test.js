@@ -20,7 +20,7 @@ var drc = require('..');
 var format = util.format;
 var log = require('./lib/log');
 
-var REPO = 'gcr.io/google_containers/pause';
+var REPO = 'gcr.io/google-containers/pause';
 var TAG = 'latest';
 
 // --- Tests
