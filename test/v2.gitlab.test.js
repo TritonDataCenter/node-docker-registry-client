@@ -24,6 +24,7 @@ var drc = require('..');
 // --- globals
 
 var log = require('./lib/log');
+const { Console } = require('console');
 
 var REPO = 'registry.gitlab.com/masakura/'
     + 'docker-registry-client-bug-sample/image';
@@ -160,6 +161,21 @@ test('v2 registry.gitlab.com', function (tt) {
         client.getManifest(getOpts, function (err, manifest_) {
             t.ifErr(err);
             t.ok(manifest);
+            ['schemaVersion',
+             'config',
+             'layers'].forEach(function (k) {
+                t.deepEqual(manifest_[k], manifest[k], k);
+            });
+            t.end();
+        });
+    });
+
+    tt.test('getManifest w/Platform (single-platform)', function (t) {
+        var getOpts = {ref: manifestDigest, maxSchemaVersion: 2};
+        client.getManifestForPlatform(getOpts, function (err, manifest_) {
+            t.error(err);
+            t.ok(manifest);
+            t.equal(manifest_.schemaVersion, 2);
             ['schemaVersion',
              'config',
              'layers'].forEach(function (k) {

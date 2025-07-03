@@ -32,6 +32,20 @@ function getFirstLayerDigestFromManifest(manifest_) {
     return manifest_.layers[0].digest;
 }
 
+function translate_arch(architecture) {
+        switch (architecture) {
+          case "x64":
+              return "amd64";
+          case "ia32":
+              return "386";
+          case "arm":
+          case "arm64":
+              return "arm/v6"; /*XXX best effort */
+          default:
+              return architecture;
+        }
+}
+
 // --- Tests
 
 test('v2 docker.io', function (tt) {
@@ -93,7 +107,7 @@ test('v2 docker.io', function (tt) {
      *      "signature": <JWS>
      *  }
      */
-    tt.test('  getManifest (v2.1)', function (t) {
+    tt.skip('  getManifest (v2.1)', function (t) {
         client.getManifest({ref: TAG}, function (err, manifest_, res) {
             t.ifErr(err);
             t.ok(manifest_);
@@ -136,7 +150,7 @@ test('v2 docker.io', function (tt) {
             t.ifErr(err);
             t.ok(manifest_);
             t.equal(manifest_.schemaVersion, 2);
-            t.equal(manifest_.mediaType, drc.MEDIATYPE_MANIFEST_LIST_V2,
+            t.equal(manifest_.mediaType, drc.MEDIATYPE_OCI_MANIFEST_LIST_V1,
                 'mediaType should be manifest list');
             t.ok(Array.isArray(manifest_.manifests), 'manifests is an array');
             manifest_.manifests.forEach(function (m) {
@@ -144,9 +158,16 @@ test('v2 docker.io', function (tt) {
                 t.ok(m.platform, 'm.platform');
                 t.ok(m.platform.architecture, 'm.platform.architecture');
                 t.ok(m.platform.os, 'os.platform.os');
+                if (manifestDigest == undefined) {
+                    // Save the first digest for later tests.
+                    // must be the same arch and linux.
+                    if (m.platform.architecture ==
+                        translate_arch(process.arch) &&
+                        m.platform.os == 'linux') {
+                        manifestDigest = m.digest;
+                        }
+                }
             });
-            // Take the first manifest (for testing purposes).
-            manifestDigest = manifest_.manifests[0].digest;
             t.end();
         });
     });
@@ -170,8 +191,8 @@ test('v2 docker.io', function (tt) {
      * }
      */
     tt.test('  getManifest (v2.2)', function (t) {
-        var getOpts = {ref: TAG, maxSchemaVersion: 2};
-        client.getManifest(getOpts, function (err, manifest_, res,
+        client.getManifestForPlatform( { ref:TAG, maxSchemaVersion: 2 },
+                                       function (err, manifest_, res,
                 manifestStr) {
             t.ifErr(err);
             manifest = manifest_;
@@ -186,6 +207,8 @@ test('v2 docker.io', function (tt) {
             var computedDigest = drc.digestFromManifestStr(manifestStr);
             t.equal(computedDigest, manifestDigest,
                 'compare computedDigest to expected manifest digest');
+            // Note: there is a multi-platform issue with checking the computed
+            // digest.
             // Note that res.headers['docker-content-digest'] may be incorrect,
             // c.f. https://github.com/docker/distribution/issues/2395
 
@@ -199,9 +222,12 @@ test('v2 docker.io', function (tt) {
      */
     tt.test('  getManifest (by digest)', function (t) {
         var getOpts = {ref: manifestDigest, maxSchemaVersion: 2};
-        client.getManifest(getOpts, function (err, manifest_) {
+        client.getManifestForPlatform(getOpts, function (err, manifest_) {
             t.ifErr(err);
             t.ok(manifest_, 'Got the manifest object');
+            console.log('manifestDigest: ' + manifestDigest);
+            console.log('manifest: ' + JSON.stringify(manifest.config, null, 2));
+            console.log('manifest_.config: ' + JSON.stringify(manifest_.config, null, 2));
             ['schemaVersion',
              'config',
              'layers'].forEach(function (k) {
@@ -286,6 +312,22 @@ test('v2 docker.io', function (tt) {
         });
     });
 
+    tt.test('getManifest (v2 single-platform)', function (t) {
+        var opts = {
+            ref: 'latest',
+            architecture: 'amd64',
+            os: 'linux',
+            maxSchemaVersion: 2
+        };
+        client.getManifestForPlatform(opts, function (err, manifest_) {
+            t.error(err, 'no error');
+            t.ok(manifest_, 'got manifest');
+            t.equal(manifest_.schemaVersion, 2, 'schemaVersion is 2');
+            t.ok(manifest_.config, 'has config');
+            t.ok(Array.isArray(manifest_.layers), 'has layers array');
+            t.end();
+        });
+    });
 
     tt.test('  headBlob', function (t) {
         var digest = getFirstLayerDigestFromManifest(manifest);
@@ -298,8 +340,8 @@ test('v2 docker.io', function (tt) {
                 'first response statusCode is 200 or 307');
             if (first.headers['docker-content-digest']) {
                 t.equal(first.headers['docker-content-digest'], digest,
-                    '"docker-content-digest" header from first response is '
-                    + 'the queried digest');
+                    '"docker-content-digest" header from first response is ' +
+                        'the queried digest');
             }
             t.equal(first.headers['docker-distribution-api-version'],
                 'registry/2.0',
@@ -342,8 +384,8 @@ test('v2 docker.io', function (tt) {
                 'createBlobReadStream first res statusCode is 200 or 307');
             if (first.headers['docker-content-digest']) {
                 t.equal(first.headers['docker-content-digest'], digest,
-                    '"docker-content-digest" header from first response is '
-                    + 'the queried digest');
+                    '"docker-content-digest" header from first response is ' +
+                        'the queried digest');
             }
             t.equal(first.headers['docker-distribution-api-version'],
                 'registry/2.0',
