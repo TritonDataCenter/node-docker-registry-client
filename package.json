@@ -8,7 +8,7 @@
         "assert-plus": "^0.1.5",
         "base64url": "1.x >=1.0.4",
         "bunyan": "1.x >=1.3.3",
-        "jws": "3.1.0",
+        "jws": "3.2.3",
         "jwk-to-pem": "1.2.0",
         "restify-clients": "^1.4.0",
         "restify-errors": "^3.0.0",
